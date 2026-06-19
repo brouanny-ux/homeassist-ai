@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeAssist AI — Inscription Artisan</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #F5F0E8; min-height: 100vh; }
+        .header { background: #5C4A32; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+        .logo { width: 38px; height: 38px; background: #8B6F47; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .header-info h1 { font-size: 16px; font-weight: 500; color: #FDFAF5; }
+        .header-info p { font-size: 12px; color: #C4A882; }
+        .header-nav { margin-left: auto; display: flex; gap: 4px; }
+        .header-nav a { font-size: 12px; color: #C4A882; padding: 6px 12px; border-radius: 8px; text-decoration: none; }
+        .header-nav a:hover { background: #8B6F47; color: #FDFAF5; }
+        .container { max-width: 600px; margin: 30px auto; padding: 0 20px; }
+        .card { background: #FDFAF5; border-radius: 12px; padding: 25px; border: 0.5px solid #D4C4A8; margin-bottom: 16px; }
+        .card h2 { color: #5C4A32; font-size: 15px; font-weight: 500; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 0.5px solid #D4C4A8; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 12px; color: #6B5740; margin-bottom: 5px; font-weight: 500; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 0.5px solid #D4C4A8; border-radius: 8px; font-size: 14px; outline: none; background: #F5F0E8; color: #3A2E22; }
+        .form-group input:focus, .form-group select:focus { border-color: #8B6F47; background: #FDFAF5; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .btn { width: 100%; padding: 13px; background: #6B8F5E; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+        .btn:hover { background: #5C4A32; }
+        .success { display: none; background: #E8F0E4; border: 0.5px solid #6B8F5E; border-radius: 8px; padding: 15px; text-align: center; color: #3A5C30; font-size: 14px; margin-top: 15px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">🏠</div>
+    <div class="header-info">
+        <h1>HomeAssist AI — Inscription Prestataire</h1>
+        <p>Rejoignez notre réseau et recevez des clients qualifiés</p>
+    </div>
+    <nav class="header-nav">
+        <a href="/">🏠 Accueil</a>
+        <a href="/artisans">🔧 Artisans</a>
+        <a href="/reservation">📅 Réservation</a>
+        <a href="/inscription">➕ Inscription</a>
+        <a href="/admin">⚙️ Admin</a>
+    </nav>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>👤 Informations personnelles</h2>
+        <div class="form-row">
+            <div class="form-group"><label>Nom *</label><input type="text" id="nom" placeholder="Votre nom"></div>
+            <div class="form-group"><label>Prénom *</label><input type="text" id="prenom" placeholder="Votre prénom"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group"><label>Téléphone *</label><input type="tel" id="telephone" placeholder="07 00 00 00 00"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="email" placeholder="votre@email.com"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📍 Localisation</h2>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Ville *</label>
+                <select id="ville">
+                    <option value="">Choisir une ville</option>
+                    <option>Abidjan</option><option>Bouaké</option><option>Yamoussoukro</option>
+                    <option>Korhogo</option><option>Man</option><option>Ouagadougou</option>
+                    <option>Dakar</option><option>Bamako</option><option>Lomé</option><option>Autre</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Quartier</label><input type="text" id="quartier" placeholder="Votre quartier"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🛠️ Spécialité</h2>
+        <div class="form-group">
+            <label>Domaine d'activité *</label>
+            <select id="specialite">
+                <option value="">Choisir une spécialité</option>
+                <optgroup label="Électricité & Équipements">
+                    <option>Électricien</option>
+                    <option>Frigoriste (clim/frigo)</option>
+                    <option>Technicien électroménager</option>
+                    <option>Technicien panneaux solaires</option>
+                </optgroup>
+                <optgroup label="Plomberie & Eau">
+                    <option>Plombier</option>
+                    <option>Technicien pompe à eau</option>
+                </optgroup>
+                <optgroup label="Gaz">
+                    <option>Revendeur de gaz</option>
+                    <option>Rechargeur de gaz</option>
+                    <option>Technicien gaz</option>
+                </optgroup>
+                <optgroup label="Maçonnerie & Structure">
+                    <option>Maçon</option><option>Carreleur</option>
+                    <option>Vitrier</option><option>Peintre</option>
+                </optgroup>
+                <optgroup label="Mobilier & Menuiserie">
+                    <option>Menuisier</option><option>Ébéniste</option>
+                </optgroup>
+                <optgroup label="Jardin">
+                    <option>Jardinier</option><option>Paysagiste</option>
+                </optgroup>
+                <optgroup label="Services à la personne">
+                    <option>Employé(e) de maison (ménage + garde)</option>
+                    <option>Agent de ménage</option>
+                    <option>Coursier / Commissions</option>
+                    <option>Garde d'enfants</option>
+                    <option>Aide aux personnes âgées</option>
+                </optgroup>
+            </select>
+        </div>
+        <div class="form-group">
+            <label>Années d'expérience</label>
+            <select id="experience">
+                <option value="">Choisir</option>
+                <option>Moins de 1 an</option><option>1 à 3 ans</option>
+                <option>3 à 5 ans</option><option>Plus de 5 ans</option>
+            </select>
+        </div>
+    </div>
+
+    <button class="btn" onclick="inscrire()">✅ S'inscrire sur HomeAssist AI</button>
+    <div class="success" id="success">
+        🎉 Inscription réussie ! Vous serez contacté dès qu'un client près de chez vous a besoin de vos services.
+    </div>
+</div>
+
+<script>
+async function inscrire() {
+    const nom = document.getElementById("nom").value.trim();
+    const prenom = document.getElementById("prenom").value.trim();
+    const telephone = document.getElementById("telephone").value.trim();
+    const email = document.getElementById("email").value.trim();
+    const ville = document.getElementById("ville").value;
+    const quartier = document.getElementById("quartier").value.trim();
+    const specialite = document.getElementById("specialite").value;
+    const experience = document.getElementById("experience").value;
+    if (!nom || !prenom || !telephone || !ville || !specialite) {
+        alert("Veuillez remplir tous les champs obligatoires (*)");
+        return;
+    }
+    const response = await fetch("/inscrire", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nom, prenom, telephone, email, ville, quartier, specialite, experience })
+    });
+    const data = await response.json();
+    if (data.success) {
+        document.getElementById("success").style.display = "block";
+        window.scrollTo(0, document.body.scrollHeight);
+    }
+}
+</script>
+</body>
+</html>

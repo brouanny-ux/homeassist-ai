@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeAssist AI — Admin</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #F5F0E8; min-height: 100vh; }
+        .header { background: #5C4A32; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+        .logo { width: 38px; height: 38px; background: #8B6F47; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .header-info h1 { font-size: 16px; font-weight: 500; color: #FDFAF5; }
+        .header-info p { font-size: 12px; color: #C4A882; }
+        .header-nav { margin-left: auto; display: flex; gap: 4px; }
+        .header-nav a { font-size: 12px; color: #C4A882; padding: 6px 12px; border-radius: 8px; text-decoration: none; }
+        .header-nav a:hover { background: #8B6F47; color: #FDFAF5; }
+        .nav { background: #6B4F35; display: flex; padding: 0 16px; }
+        .nav-btn { padding: 12px 18px; color: #C4A882; font-size: 13px; cursor: pointer; border: none; background: transparent; }
+        .nav-btn:hover, .nav-btn.active { color: #FDFAF5; border-bottom: 2px solid #A8C5A0; }
+        .container { max-width: 1000px; margin: 25px auto; padding: 0 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: #FDFAF5; border-radius: 12px; padding: 18px; text-align: center; border: 0.5px solid #D4C4A8; }
+        .stat-card .number { font-size: 30px; font-weight: 500; color: #5C4A32; }
+        .stat-card .label { font-size: 12px; color: #8B6F47; margin-top: 4px; }
+        .card { background: #FDFAF5; border-radius: 12px; padding: 20px; border: 0.5px solid #D4C4A8; margin-bottom: 16px; }
+        .card h2 { color: #5C4A32; font-size: 15px; font-weight: 500; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 0.5px solid #D4C4A8; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background: #E8DCC8; color: #5C4A32; padding: 10px 12px; text-align: left; font-weight: 500; }
+        td { padding: 10px 12px; border-bottom: 0.5px solid #EDE4D4; color: #3A2E22; }
+        tr:hover { background: #FDF8F0; }
+        .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 500; }
+        .badge-attente { background: #F5EDD8; color: #7A5020; }
+        .badge-confirme { background: #E8F0E4; color: #3A5C30; }
+        .badge-annule { background: #F5E4E4; color: #7A2020; }
+        .section { display: none; }
+        .section.active { display: block; }
+        .btn-sm { padding: 5px 10px; border-radius: 6px; border: none; cursor: pointer; font-size: 12px; margin-right: 4px; }
+        .btn-confirmer { background: #E8F0E4; color: #3A5C30; }
+        .btn-annuler { background: #F5E4E4; color: #7A2020; }
+        .search-bar { width: 100%; padding: 10px 14px; border: 0.5px solid #D4C4A8; border-radius: 8px; font-size: 14px; margin-bottom: 15px; outline: none; background: #F5F0E8; color: #3A2E22; }
+        .search-bar:focus { border-color: #8B6F47; background: #FDFAF5; }
+        .empty { text-align: center; color: #8B6F47; padding: 30px; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">🏠</div>
+    <div class="header-info">
+        <h1>HomeAssist AI — Panel Administrateur</h1>
+        <p>Tableau de bord de gestion</p>
+    </div>
+    <nav class="header-nav">
+        <a href="/">🏠 Accueil</a>
+        <a href="/artisans">🔧 Artisans</a>
+        <a href="/reservation">📅 Réservation</a>
+        <a href="/inscription">➕ Inscription</a>
+    </nav>
+</div>
+
+<div class="nav">
+    <button class="nav-btn active" onclick="showSection('dashboard', this)">📊 Dashboard</button>
+    <button class="nav-btn" onclick="showSection('reservations', this)">📅 Réservations</button>
+    <button class="nav-btn" onclick="showSection('artisans', this)">🔧 Artisans</button>
+</div>
+
+<div class="container">
+
+    <!-- DASHBOARD -->
+   
+    <<div class="stats-grid">
+    <div class="stat-card" onclick="showSection('reservations', document.querySelectorAll('.nav-btn')[1])" style="cursor:pointer;">
+    <div class="number" id="stat-reservations">0</div>
+    <div class="label">Réservations totales</div>
+    <div style="font-size:11px;color:#8B6F47;margin-top:6px;">Voir tout →</div>
+</div>
+<div class="stat-card" onclick="showSection('artisans', document.querySelectorAll('.nav-btn')[2])" style="cursor:pointer;">
+    <div class="number" id="stat-artisans">0</div>
+    <div class="label">Artisans inscrits</div>
+    <div style="font-size:11px;color:#8B6F47;margin-top:6px;">Voir tout →</div>
+</div>
+<div class="stat-card" onclick="showSection('reservations', document.querySelectorAll('.nav-btn')[1], 'en_attente')" style="cursor:pointer;border-left:3px solid #EF9F27;">
+    <div class="number" id="stat-attente" style="color:#854F0B;">0</div>
+    <div class="label">En attente</div>
+    <div style="font-size:11px;color:#8B6F47;margin-top:6px;">Voir liste →</div>
+</div>
+<div class="stat-card" onclick="showSection('reservations', document.querySelectorAll('.nav-btn')[1], 'confirme')" style="cursor:pointer;border-left:3px solid #6B8F5E;">
+    <div class="number" id="stat-confirmes" style="color:#3A5C30;">0</div>
+    <div class="label">Confirmées</div>
+    <div style="font-size:11px;color:#8B6F47;margin-top:6px;">Voir liste →</div>
+</div>
+</div>
+
+<!-- GRAPHIQUES -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+    <div class="card">
+        <h2>📊 Réservations par service</h2>
+        <canvas id="chartServices" height="200"></canvas>
+    </div>
+    <div class="card">
+        <h2>📊 Artisans par spécialité</h2>
+        <canvas id="chartArtisans" height="200"></canvas>
+    </div>
+</div>
+        <div class="card">
+            <h2>📅 Dernières réservations</h2>
+            <table>
+                <thead><tr><th>Client</th><th>Service</th><th>Ville</th><th>Date</th><th>Durée</th><th>Statut</th></tr></thead>
+                <tbody id="recent-reservations"><tr><td colspan="6" class="empty">Chargement...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- RÉSERVATIONS -->
+    <div class="section" id="section-reservations">
+        <div class="card">
+            <h2>📅 Toutes les réservations</h2>
+            <input type="text" class="search-bar" placeholder="🔍 Rechercher par nom, ville, service..." oninput="filtrerReservations(this.value)">
+            <table>
+                <thead><tr><th>ID</th><th>Client</th><th>Téléphone</th><th>Service</th><th>Ville</th><th>Date</th><th>Durée</th><th>Statut</th><th>Actions</th></tr></thead>
+                <tbody id="all-reservations"><tr><td colspan="9" class="empty">Chargement...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- ARTISANS -->
+    <div class="section" id="section-artisans">
+        <div class="card">
+            <h2>🔧 Artisans inscrits</h2>
+            <input type="text" class="search-bar" placeholder="🔍 Rechercher par nom, ville, spécialité..." oninput="filtrerArtisans(this.value)">
+            <table>
+                <thead><tr><th>ID</th><th>Nom</th><th>Téléphone</th><th>Ville</th><th>Spécialité</th><th>Expérience</th><th>Statut</th><th>Actions</th></tr></thead>
+                <tbody id="all-artisans"><tr><td colspan="8" class="empty">Chargement...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let allReservations = [];
+    let allArtisans = [];
+
+    function showSection(name, btn, filtre = null) {
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+    document.getElementById("section-" + name).classList.add("active");
+    btn.classList.add("active");
+    if (filtre && name === "reservations") {
+        const filtered = allReservations.filter(r => r.statut === filtre);
+        afficherReservations(filtered);
+        document.querySelector(".search-bar").value = "";
+    }
+    if (filtre && name === "artisans") {
+        afficherArtisans(allArtisans);
+    }
+}
+
+    function badgeStatut(statut) {
+        const classes = { "en_attente": "badge-attente", "confirme": "badge-confirme", "annule": "badge-annule" };
+        const labels = { "en_attente": "En attente", "confirme": "Confirmé", "annule": "Annulé" };
+        return `<span class="badge ${classes[statut] || 'badge-attente'}">${labels[statut] || statut}</span>`;
+    }
+
+    async function chargerDonnees() {
+        const res = await fetch("/admin/data");
+        const data = await res.json();
+        allReservations = data.reservations;
+        allArtisans = data.artisans;
+
+        document.getElementById("stat-reservations").textContent = allReservations.length;
+        document.getElementById("stat-artisans").textContent = allArtisans.length;
+        document.getElementById("stat-attente").textContent = allReservations.filter(r => r.statut === "en_attente").length;
+        document.getElementById("stat-confirmes").textContent = allReservations.filter(r => r.statut === "confirme").length;
+
+        const recent = allReservations.slice(-5).reverse();
+        document.getElementById("recent-reservations").innerHTML = recent.length ? recent.map(r => `
+            <tr>
+                <td>${r.nom_client}</td>
+                <td>${r.type_service} — ${r.sous_service}</td>
+                <td>${r.ville}</td>
+                <td>${r.date_intervention} ${r.heure_debut}</td>
+                <td>${r.duree}</td>
+                <td>${badgeStatut(r.statut)}</td>
+            </tr>`).join("") : `<tr><td colspan="6" class="empty">Aucune réservation</td></tr>`;
+
+        afficherReservations(allReservations);
+        afficherArtisans(allArtisans);
+    }
+
+    function afficherReservations(liste) {
+        document.getElementById("all-reservations").innerHTML = liste.length ? liste.map(r => `
+            <tr>
+                <td>#${r.id}</td>
+                <td>${r.nom_client}</td>
+                <td>${r.telephone_client}</td>
+                <td>${r.type_service} — ${r.sous_service}</td>
+                <td>${r.ville}${r.quartier ? ' / ' + r.quartier : ''}</td>
+                <td>${r.date_intervention} ${r.heure_debut}</td>
+                <td>${r.duree}</td>
+                <td>${badgeStatut(r.statut)}</td>
+                <td>
+                    <button class="btn-sm btn-confirmer" onclick="changerStatut(${r.id},'confirme')">✓ Confirmer</button>
+                    <button class="btn-sm btn-annuler" onclick="changerStatut(${r.id},'annule')">✗ Annuler</button>
+                </td>
+            </tr>`).join("") : `<tr><td colspan="9" class="empty">Aucune réservation</td></tr>`;
+    }
+
+    function afficherArtisans(liste) {
+        document.getElementById("all-artisans").innerHTML = liste.length ? liste.map(a => `
+            <tr>
+                <td>#${a.id}</td>
+                <td>${a.nom} ${a.prenom}</td>
+                <td>${a.telephone}</td>
+                <td>${a.ville}${a.quartier ? ' / ' + a.quartier : ''}</td>
+                <td>${a.specialite}</td>
+                <td>${a.experience || '-'}</td>
+                <td><span class="badge ${a.disponible ? 'badge-confirme' : 'badge-annule'}">${a.disponible ? 'Disponible' : 'Indisponible'}</span></td>
+                <td><button class="btn-sm ${a.disponible ? 'btn-annuler' : 'btn-confirmer'}" onclick="toggleArtisan(${a.id},${a.disponible})">${a.disponible ? 'Désactiver' : 'Activer'}</button></td>
+            </tr>`).join("") : `<tr><td colspan="8" class="empty">Aucun artisan</td></tr>`;
+    }
+
+    function filtrerReservations(q) {
+        q = q.toLowerCase();
+        afficherReservations(allReservations.filter(r => r.nom_client.toLowerCase().includes(q) || r.ville.toLowerCase().includes(q) || r.type_service.toLowerCase().includes(q)));
+    }
+
+    function filtrerArtisans(q) {
+        q = q.toLowerCase();
+        afficherArtisans(allArtisans.filter(a => a.nom.toLowerCase().includes(q) || a.ville.toLowerCase().includes(q) || a.specialite.toLowerCase().includes(q)));
+    }
+
+    async function changerStatut(id, statut) {
+        await fetch("/admin/statut_reservation", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, statut }) });
+        chargerDonnees();
+    }
+
+    async function toggleArtisan(id, actuel) {
+        await fetch("/admin/toggle_artisan", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, disponible: actuel ? 0 : 1 }) });
+        chargerDonnees();
+    }
+
+    chargerDonnees();
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<script>
+let chartServices = null;
+let chartArtisans = null;
+
+function drawCharts(reservations, artisans) {
+    // Graphique réservations par service
+    const serviceCount = {};
+    reservations.forEach(r => {
+        serviceCount[r.type_service] = (serviceCount[r.type_service] || 0) + 1;
+    });
+    const servicesLabels = Object.keys(serviceCount);
+    const servicesData = Object.values(serviceCount);
+
+    if (chartServices) chartServices.destroy();
+    chartServices = new Chart(document.getElementById("chartServices"), {
+        type: "doughnut",
+        data: {
+            labels: servicesLabels.length ? servicesLabels : ["Aucune donnée"],
+            datasets: [{
+                data: servicesData.length ? servicesData : [1],
+                backgroundColor: ["#8B6F47", "#6B8F5E", "#A8C5A0", "#C4A882", "#5C4A32"],
+                borderWidth: 0
+            }]
+        },
+        options: { plugins: { legend: { position: "bottom", labels: { font: { size: 11 }, color: "#5C4A32" } } }, cutout: "60%" }
+    });
+
+    // Graphique artisans par spécialité
+    const specCount = {};
+    artisans.forEach(a => {
+        const spec = a.specialite.length > 15 ? a.specialite.substring(0, 15) + "..." : a.specialite;
+        specCount[spec] = (specCount[spec] || 0) + 1;
+    });
+    const specLabels = Object.keys(specCount);
+    const specData = Object.values(specCount);
+
+    if (chartArtisans) chartArtisans.destroy();
+    chartArtisans = new Chart(document.getElementById("chartArtisans"), {
+        type: "bar",
+        data: {
+            labels: specLabels.length ? specLabels : ["Aucune donnée"],
+            datasets: [{
+                label: "Artisans",
+                data: specData.length ? specData : [0],
+                backgroundColor: "#8B6F47",
+                borderRadius: 6
+            }]
+        },
+        options: {
+            plugins: { legend: { display: false } },
+            scales: {
+                y: { ticks: { stepSize: 1, color: "#5C4A32" }, grid: { color: "#EDE4D4" } },
+                x: { ticks: { color: "#5C4A32", font: { size: 10 } }, grid: { display: false } }
+            }
+        }
+    });
+}
+</script>
+</body>
+</html>

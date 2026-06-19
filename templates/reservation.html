@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeAssist AI — Réservation</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #F5F0E8; min-height: 100vh; }
+        .header { background: #5C4A32; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+        .logo { width: 38px; height: 38px; background: #8B6F47; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .header-info h1 { font-size: 16px; font-weight: 500; color: #FDFAF5; }
+        .header-info p { font-size: 12px; color: #C4A882; }
+        .header-nav { margin-left: auto; display: flex; gap: 4px; }
+        .header-nav a { font-size: 12px; color: #C4A882; padding: 6px 12px; border-radius: 8px; text-decoration: none; }
+        .header-nav a:hover { background: #8B6F47; color: #FDFAF5; }
+        .container { max-width: 600px; margin: 30px auto; padding: 0 20px; }
+        .card { background: #FDFAF5; border-radius: 12px; padding: 25px; border: 0.5px solid #D4C4A8; margin-bottom: 16px; }
+        .card h2 { color: #5C4A32; font-size: 15px; font-weight: 500; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 0.5px solid #D4C4A8; }
+        .form-group { margin-bottom: 14px; }
+        .form-group label { display: block; font-size: 12px; color: #6B5740; margin-bottom: 5px; font-weight: 500; }
+        .form-group input, .form-group select { width: 100%; padding: 10px 14px; border: 0.5px solid #D4C4A8; border-radius: 8px; font-size: 14px; outline: none; background: #F5F0E8; color: #3A2E22; }
+        .form-group input:focus, .form-group select:focus { border-color: #8B6F47; background: #FDFAF5; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+        .service-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px; }
+        .service-btn { border: 0.5px solid #D4C4A8; border-radius: 10px; padding: 12px 8px; text-align: center; cursor: pointer; background: #F5F0E8; }
+        .service-btn:hover, .service-btn.active { background: #E8DCC8; border-color: #8B6F47; }
+        .service-btn .icon { font-size: 24px; display: block; margin-bottom: 4px; }
+        .service-btn span { font-size: 12px; font-weight: 500; color: #5C4A32; }
+        .duree-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+        .duree-btn { padding: 8px; border: 0.5px solid #D4C4A8; border-radius: 8px; text-align: center; cursor: pointer; font-size: 13px; background: #F5F0E8; color: #5C4A32; }
+        .duree-btn.active, .duree-btn:hover { background: #E8DCC8; border-color: #8B6F47; font-weight: 500; color: #3A2E22; }
+        .notif-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 0.5px solid #EDE4D4; font-size: 13px; color: #5C4A32; }
+        .notif-item:last-child { border-bottom: none; }
+        .toggle { position: relative; width: 36px; height: 20px; }
+        .toggle input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; inset: 0; background: #D4C4A8; border-radius: 10px; cursor: pointer; transition: .2s; }
+        .slider:before { content: ''; position: absolute; width: 14px; height: 14px; left: 3px; top: 3px; background: white; border-radius: 50%; transition: .2s; }
+        .toggle input:checked + .slider { background: #6B8F5E; }
+        .toggle input:checked + .slider:before { transform: translateX(16px); }
+        .recap { background: #F5F0E8; border-radius: 8px; padding: 15px; margin-bottom: 15px; border: 0.5px solid #D4C4A8; }
+        .recap-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 13px; color: #6B5740; }
+        .recap-total { font-weight: 500; border-top: 0.5px solid #D4C4A8; margin-top: 8px; padding-top: 8px; color: #3A2E22; }
+        .btn { width: 100%; padding: 13px; background: #6B8F5E; color: white; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; }
+        .btn:hover { background: #5C4A32; }
+        .success { display: none; background: #E8F0E4; border: 0.5px solid #6B8F5E; border-radius: 8px; padding: 15px; text-align: center; color: #3A5C30; font-size: 14px; margin-top: 15px; }
+        .hint { font-size: 12px; color: #8B6F47; margin-top: 6px; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">🏠</div>
+    <div class="header-info">
+        <h1>HomeAssist AI — Réservation</h1>
+        <p>Réservez un prestataire vérifié près de chez vous</p>
+    </div>
+    <nav class="header-nav">
+        <a href="/">🏠 Accueil</a>
+        <a href="/artisans">🔧 Artisans</a>
+        <a href="/reservation">📅 Réservation</a>
+        <a href="/inscription">➕ Inscription</a>
+        <a href="/admin">⚙️ Admin</a>
+    </nav>
+</div>
+
+<div class="container">
+    <div class="card">
+        <h2>🛎️ Étape 1 — Choisissez votre service</h2>
+        <div class="service-grid">
+    <div class="service-btn active" onclick="selectService(this,'Courses',['Marché traditionnel','Supermarché','Pharmacie','Commissions diverses'])">
+        <span class="icon">🛒</span><span>Courses</span>
+    </div>
+    <div class="service-btn" onclick="selectService(this,'Ménage',['Nettoyage complet','Repassage','Lessive','Rangement','Cuisine'])">
+        <span class="icon">🧹</span><span>Ménage</span>
+    </div>
+    <div class="service-btn" onclick="selectService(this,'Garde',[`Garde d'enfants`,'Baby-sitting','Accompagnement scolaire','Aide personnes âgées'])">
+        <span class="icon">👶</span><span>Garde</span>
+    </div>
+    <div class="service-btn" onclick="selectService(this,'Employé(e) de maison',['Ménage + Garde enfants','Ménage + Cuisine','Ménage + Repassage + Garde','Toutes tâches domestiques','Sur mesure (à préciser)'])">
+        <span class="icon">🏡</span><span>Employé(e) de maison</span>
+    </div>
+</div>
+        <div class="form-group">
+            <label>Précisez le type de prestation *</label>
+            <select id="sous_service">
+                <option>Marché traditionnel</option>
+                <option>Supermarché</option>
+                <option>Pharmacie</option>
+                <option>Commissions diverses</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>👤 Étape 2 — Vos informations</h2>
+        <div class="form-row">
+            <div class="form-group"><label>Nom complet *</label><input type="text" id="nom_client" placeholder="Votre nom"></div>
+            <div class="form-group"><label>Téléphone *</label><input type="tel" id="telephone_client" placeholder="07 00 00 00 00"></div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label>Ville *</label>
+                <select id="ville">
+                    <option>Abidjan</option><option>Bouaké</option><option>Yamoussoukro</option>
+                    <option>Korhogo</option><option>Man</option><option>Ouagadougou</option>
+                    <option>Dakar</option><option>Bamako</option><option>Lomé</option>
+                </select>
+            </div>
+            <div class="form-group"><label>Quartier</label><input type="text" id="quartier" placeholder="Ex: Cocody, Plateau..."></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🕐 Étape 3 — Date et durée</h2>
+        <div class="form-row">
+            <div class="form-group"><label>Date d'intervention *</label><input type="date" id="date_intervention"></div>
+            <div class="form-group"><label>Heure de début *</label><input type="time" id="heure_debut" value="08:00"></div>
+        </div>
+        <div class="form-group">
+            <label>Durée de la prestation</label>
+            <div style="margin-bottom:10px;">
+    <label style="font-size:12px;color:#6B5740;font-weight:500;display:block;margin-bottom:6px;">Type de contrat</label>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px;">
+        <div class="duree-btn active" onclick="selectContrat(this,'Ponctuel')" id="contrat-ponctuel">⏱️ Ponctuel</div>
+        <div class="duree-btn" onclick="selectContrat(this,'Long terme')" id="contrat-long">📅 Long terme</div>
+    </div>
+</div>
+
+<div id="duree-ponctuell">
+    <label style="font-size:12px;color:#6B5740;font-weight:500;display:block;margin-bottom:6px;">Durée de la prestation</label>
+    <div class="duree-grid">
+        <div class="duree-btn active" onclick="selectDuree(this,'1h')">1h</div>
+        <div class="duree-btn" onclick="selectDuree(this,'2h')">2h</div>
+        <div class="duree-btn" onclick="selectDuree(this,'3h')">3h</div>
+        <div class="duree-btn" onclick="selectDuree(this,'4h')">4h</div>
+        <div class="duree-btn" onclick="selectDuree(this,'Demi-journée')">Demi-journée</div>
+        <div class="duree-btn" onclick="selectDuree(this,'Journée complète')">Journée complète</div>
+    </div>
+</div>
+
+<div id="duree-long" style="display:none;">
+    <label style="font-size:12px;color:#6B5740;font-weight:500;display:block;margin-bottom:6px;">Durée du contrat</label>
+    <div class="duree-grid">
+        <div class="duree-btn active" onclick="selectDuree(this,'1 mois')">1 mois</div>
+        <div class="duree-btn" onclick="selectDuree(this,'3 mois')">3 mois</div>
+        <div class="duree-btn" onclick="selectDuree(this,'6 mois')">6 mois</div>
+        <div class="duree-btn" onclick="selectDuree(this,'1 an')">1 an</div>
+        <div class="duree-btn" onclick="selectDuree(this,'2 ans')">2 ans</div>
+        <div class="duree-btn" onclick="selectDuree(this,'Indéterminé')">Indéterminé</div>
+    </div>
+    <div style="margin-top:12px;">
+        <label style="font-size:12px;color:#6B5740;font-weight:500;display:block;margin-bottom:6px;">Logement fourni ?</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">
+            <div class="duree-btn active" onclick="selectLogement(this,'Non')">🏠 Non</div>
+            <div class="duree-btn" onclick="selectLogement(this,'Oui')">✅ Oui</div>
+            <div class="duree-btn" onclick="selectLogement(this,'À négocier')">🤝 À négocier</div>
+        </div>
+    </div>
+    <div style="margin-top:12px;">
+        <label style="font-size:12px;color:#6B5740;font-weight:500;display:block;margin-bottom:6px;">Salaire mensuel proposé (FCFA)</label>
+        <input type="number" id="salaire" placeholder="Ex: 50000" style="width:100%;padding:10px 14px;border:0.5px solid #D4C4A8;border-radius:8px;font-size:14px;outline:none;background:#F5F0E8;color:#3A2E22;">
+    </div>
+</div>
+        </div>
+        <p class="hint" id="recap_heure">⏰ Fin prévue : calcul en cours...</p>
+    </div>
+
+    <div class="card">
+        <h2>🔔 Étape 4 — Notifications</h2>
+       <div class="notif-item"><span>✅ Confirmation de réservation</span><span style="font-size:12px;color:#6B8F5E;font-weight:500;">📲 Par WhatsApp / SMS</span></div>
+        <div class="notif-item"><span>⏰ Rappel 1h avant</span><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="notif-item"><span>🚶 Prestataire en route</span><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="notif-item"><span>▶️ Début de prestation</span><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="notif-item"><span>⚡ Rappel 15 min avant la fin</span><label class="toggle"><input type="checkbox" checked><span class="slider"></span></label></div>
+        <div class="notif-item"><span>⭐ Invitation à noter le prestataire</span><label class="toggle"><input type="checkbox"><span class="slider"></span></label></div>
+    </div>
+
+    <div class="card">
+        <h2>💰 Récapitulatif</h2>
+        <div class="recap">
+            <div class="recap-row"><span id="recap_service">Courses — Marché traditionnel</span><span id="recap_prix">2 000 FCFA</span></div>
+            <div class="recap-row"><span>Frais de service HomeAssist</span><span>200 FCFA</span></div>
+            <div class="recap-row recap-total"><span>Total</span><span id="recap_total">2 200 FCFA</span></div>
+        </div>
+        <button class="btn" onclick="reserver()">✅ Confirmer la réservation</button>
+        <div class="success" id="success">
+            🎉 Réservation confirmée ! Un prestataire vous contactera très bientôt.
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedService = "Courses";
+    let selectedDuree = "2h";
+   const tarifs = { "Courses": 2000, "Ménage": 3000, "Garde": 4000, "Employé(e) de maison": 0 };
+
+    document.getElementById("date_intervention").min = new Date().toISOString().split("T")[0];
+    document.getElementById("date_intervention").value = new Date().toISOString().split("T")[0];
+
+    function selectService(el, service, sousList) {
+        document.querySelectorAll(".service-btn").forEach(b => b.classList.remove("active"));
+        el.classList.add("active");
+        selectedService = service;
+        const select = document.getElementById("sous_service");
+        select.innerHTML = sousList.map(s => `<option>${s}</option>`).join("");
+        updateRecap();
+    }
+let selectedContrat = "Ponctuel";
+let selectedLogement = "Non";
+
+function selectContrat(el, contrat) {
+    document.querySelectorAll("#contrat-ponctuel, #contrat-long").forEach(b => b.classList.remove("active"));
+    el.classList.add("active");
+    selectedContrat = contrat;
+    if (contrat === "Long terme") {
+        document.getElementById("duree-ponctuell").style.display = "none";
+        document.getElementById("duree-long").style.display = "block";
+        selectedDuree = "1 mois";
+    } else {
+        document.getElementById("duree-ponctuell").style.display = "block";
+        document.getElementById("duree-long").style.display = "none";
+        selectedDuree = "1h";
+    }
+}
+
+function selectLogement(el, logement) {
+    el.parentElement.querySelectorAll(".duree-btn").forEach(b => b.classList.remove("active"));
+    el.classList.add("active");
+    selectedLogement = logement;
+}
+    function selectDuree(el, duree) {
+        document.querySelectorAll(".duree-btn").forEach(b => b.classList.remove("active"));
+        el.classList.add("active");
+        selectedDuree = duree;
+        updateHeureFin();
+    }
+
+    function updateHeureFin() {
+        const heure = document.getElementById("heure_debut").value;
+        if (!heure) return;
+        const [h, m] = heure.split(":").map(Number);
+        const durees = { "1h": 1, "2h": 2, "3h": 3, "4h": 4, "Demi-journée": 4, "Journée complète": 8 };
+        const fin = h + (durees[selectedDuree] || 2);
+        document.getElementById("recap_heure").textContent = `⏰ Fin prévue : ${String(fin).padStart(2,"0")}:${String(m).padStart(2,"0")}`;
+    }
+
+    function updateRecap() {
+    const sous = document.getElementById("sous_service").value;
+    const prix = tarifs[selectedService] || 2000;
+    document.getElementById("recap_service").textContent = `${selectedService} — ${sous}`;
+
+    if (selectedService === "Employé(e) de maison") {
+        document.getElementById("recap_prix").textContent = "À négocier";
+        document.getElementById("recap_total").textContent = "Selon contrat";
+    } else if (selectedContrat === "Long terme") {
+        document.getElementById("recap_prix").textContent = "Selon contrat";
+        document.getElementById("recap_total").textContent = "À définir";
+    } else {
+        document.getElementById("recap_prix").textContent = `${prix.toLocaleString()} FCFA`;
+        document.getElementById("recap_total").textContent = `${(prix + 200).toLocaleString()} FCFA`;
+    }
+}
+    document.getElementById("heure_debut").addEventListener("change", updateHeureFin);
+    document.getElementById("sous_service").addEventListener("change", updateRecap);
+    updateHeureFin();
+
+    async function reserver() {
+        const nom = document.getElementById("nom_client").value.trim();
+        const telephone = document.getElementById("telephone_client").value.trim();
+        const ville = document.getElementById("ville").value;
+        const quartier = document.getElementById("quartier").value.trim();
+        const date = document.getElementById("date_intervention").value;
+        const heure = document.getElementById("heure_debut").value;
+        const sous = document.getElementById("sous_service").value;
+        if (!nom || !telephone) {
+    alert("Veuillez remplir le nom et le téléphone (*)");
+    return;
+}
+if (selectedContrat === "Ponctuel" && (!date || !heure)) {
+    alert("Veuillez remplir la date et l'heure pour une prestation ponctuelle (*)");
+    return;
+}
+       const salaire = document.getElementById("salaire") ? document.getElementById("salaire").value : "";
+        const response = await fetch("/reserver", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ nom_client: nom, telephone_client: telephone, ville, quartier, type_service: selectedService, sous_service: sous, date_intervention: date, heure_debut: heure, duree: selectedDuree, contrat: selectedContrat, logement: selectedLogement, salaire })
+        });        
+        const data = await response.json();
+      if (data.success) {
+    const msg = document.getElementById("success");
+    msg.style.display = "block";
+    window.scrollTo(0, document.body.scrollHeight);
+    setTimeout(() => {
+        msg.style.display = "none";
+    }, 4000);
+}
+    }
+</script>
+</body>
+</html>

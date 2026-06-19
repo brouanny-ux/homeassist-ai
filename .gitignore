@@ -1,0 +1,7 @@
+venv/
+.env
+__pycache__/
+*.pyc
+homeassist.db
+test.py
+chatbot.py
