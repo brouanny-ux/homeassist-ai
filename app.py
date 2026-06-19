@@ -7,7 +7,7 @@ import sqlite3
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 
 historique = []
 
