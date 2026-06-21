@@ -6,48 +6,98 @@
     <title>HomeAssist AI</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-    font-family: Arial, sans-serif; 
-    min-height: 100vh;
-    background: url('/static/African_Home.webp') center center fixed;
-    background-size: cover; display: flex; flex-direction: column; }
+        body { font-family: Arial, sans-serif; background: url('/static/African_Home.webp') center center fixed; background-size: cover; min-height: 100vh; }
 
+        /* HEADER */
         .header { background: #5C4A32; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
-        .logo { width: 38px; height: 38px; background: #8B6F47; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .logo { width: 38px; height: 38px; background: #8B6F47; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: transform .2s, background .2s; text-decoration: none; }
+        .logo:hover { background: #6B8F5E; transform: scale(1.1); }
         .header-info h1 { font-size: 16px; font-weight: 500; color: #FDFAF5; }
         .header-info p { font-size: 12px; color: #C4A882; }
         .header-nav { margin-left: auto; display: flex; gap: 4px; }
-        .header-nav a { font-size: 12px; color: #C4A882; padding: 6px 12px; border-radius: 8px; text-decoration: none; }
+        .header-nav a { font-size: 12px; color: #C4A882; padding: 6px 12px; border-radius: 8px; text-decoration: none; transition: background .15s; }
         .header-nav a:hover { background: #8B6F47; color: #FDFAF5; }
 
-        .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 12px 15px; background: #6B4F35; border-bottom: 0.5px solid #8B6F47; }
-        .qa-btn { background: #8B6F47; border: 0.5px solid #A0825A; border-radius: 10px; padding: 10px 8px; text-align: center; text-decoration: none; cursor: pointer; transition: background .15s; }
-        .qa-btn:hover { background: #A8C5A0; border-color: #6B8F5E; }
+        /* QUICK ACTIONS */
+        .quick-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 12px 15px; background: #6B4F35cc; backdrop-filter: blur(4px); border-bottom: 0.5px solid #8B6F47; }
+        .qa-btn { background: #8B6F47cc; border: 0.5px solid #A0825A; border-radius: 10px; padding: 10px 8px; text-align: center; text-decoration: none; cursor: pointer; transition: all .2s; }
+        .qa-btn:hover { background: #6B8F5E; border-color: #6B8F5E; transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
         .qa-btn .icon { font-size: 20px; display: block; margin-bottom: 4px; }
         .qa-btn span { font-size: 11px; color: #FDFAF5; font-weight: 500; }
 
-        .chat-box { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
-        .message { max-width: 78%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.5; }
-        .message.bot { background: #FDFAF5; color: #3A2E22; border-bottom-left-radius: 4px; align-self: flex-start; border: 0.5px solid #D4C4A8; }
-        .message.user { background: #6B8F5E; color: #FDFAF5; border-bottom-right-radius: 4px; align-self: flex-end; }
+        /* PAGE CONTENT */
+        .page-content { padding: 40px 20px; max-width: 800px; margin: 0 auto; }
+        .welcome-card { background: rgba(253, 250, 245, 0.92); border-radius: 16px; padding: 30px; border: 0.5px solid #D4C4A8; backdrop-filter: blur(8px); margin-bottom: 20px; }
+        .welcome-card h2 { color: #5C4A32; font-size: 22px; margin-bottom: 10px; }
+        .welcome-card p { color: #6B5740; font-size: 14px; line-height: 1.6; margin-bottom: 15px; }
+        .service-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-top: 20px; }
+        .service-card { background: rgba(232, 220, 200, 0.9); border-radius: 12px; padding: 15px; border: 0.5px solid #D4C4A8; cursor: pointer; transition: all .2s; text-decoration: none; display: block; }
+        .service-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(92,74,50,0.2); background: rgba(232, 220, 200, 1); }
+        .service-card .icon { font-size: 28px; margin-bottom: 8px; display: block; }
+        .service-card h3 { color: #5C4A32; font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+        .service-card p { color: #8B6F47; font-size: 12px; margin: 0; }
 
-        .typing { display: none; align-items: center; gap: 5px; padding: 10px 14px; background: #FDFAF5; border-radius: 14px; border-bottom-left-radius: 4px; width: fit-content; border: 0.5px solid #D4C4A8; }
-        .typing span { width: 7px; height: 7px; background: #8B6F47; border-radius: 50%; animation: bounce 1s infinite; }
+        /* BUDGET MODAL */
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .modal-overlay.active { display: flex; }
+        .modal { background: #FDFAF5; border-radius: 16px; width: 90%; max-width: 550px; max-height: 85vh; overflow-y: auto; border: 0.5px solid #D4C4A8; }
+        .modal-header { background: #5C4A32; padding: 16px 20px; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center; }
+        .modal-header h2 { color: #FDFAF5; font-size: 16px; font-weight: 500; }
+        .modal-close { background: none; border: none; color: #C4A882; font-size: 20px; cursor: pointer; }
+        .modal-body { padding: 20px; }
+        .budget-section { margin-bottom: 20px; }
+        .budget-section h3 { color: #5C4A32; font-size: 14px; font-weight: 500; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 0.5px solid #D4C4A8; }
+        .facture-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 0.5px solid #EDE4D4; }
+        .facture-item:last-child { border-bottom: none; }
+        .facture-label { display: flex; align-items: center; gap: 8px; font-size: 13px; color: #3A2E22; }
+        .facture-amount { font-size: 13px; font-weight: 500; color: #5C4A32; }
+        .facture-status { font-size: 11px; padding: 2px 8px; border-radius: 10px; }
+        .status-paid { background: #E8F0E4; color: #3A5C30; }
+        .status-due { background: #FAEEDA; color: #854F0B; }
+        .status-overdue { background: #FBEAEA; color: #7A2020; }
+        .budget-input { width: 100%; padding: 8px 12px; border: 0.5px solid #D4C4A8; border-radius: 8px; font-size: 13px; background: #F5F0E8; color: #3A2E22; outline: none; margin-top: 6px; }
+        .budget-input:focus { border-color: #8B6F47; }
+        .add-btn { width: 100%; padding: 10px; background: #6B8F5E; color: white; border: none; border-radius: 8px; font-size: 13px; cursor: pointer; margin-top: 10px; }
+        .add-btn:hover { background: #5C4A32; }
+        .rappel-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: #F5F0E8; border-radius: 8px; margin-bottom: 6px; font-size: 13px; }
+        .rappel-date { color: #8B6F47; font-size: 11px; }
+        .budget-total { background: #5C4A32; color: white; border-radius: 10px; padding: 14px 16px; display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+        .budget-total .label { font-size: 13px; color: #C4A882; }
+        .budget-total .amount { font-size: 18px; font-weight: 500; }
+
+        /* CHATBOT FLOTTANT */
+        .chat-fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; background: #5C4A32; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px; cursor: pointer; box-shadow: 0 4px 20px rgba(92,74,50,0.4); z-index: 999; transition: all .2s; border: none; }
+        .chat-fab:hover { background: #6B8F5E; transform: scale(1.1); }
+        .chat-fab .notif-dot { position: absolute; top: 2px; right: 2px; width: 14px; height: 14px; background: #E8A020; border-radius: 50%; border: 2px solid white; display: flex; align-items: center; justify-content: center; font-size: 8px; color: white; font-weight: bold; }
+
+        .chat-window { position: fixed; bottom: 90px; right: 24px; width: 360px; height: 500px; background: #FDFAF5; border-radius: 16px; box-shadow: 0 8px 40px rgba(92,74,50,0.3); z-index: 999; display: none; flex-direction: column; border: 0.5px solid #D4C4A8; overflow: hidden; }
+        .chat-window.open { display: flex; }
+        .chat-header { background: #5C4A32; padding: 14px 16px; display: flex; align-items: center; gap: 10px; }
+        .chat-avatar { width: 34px; height: 34px; background: #8B6F47; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+        .chat-header-info h3 { color: #FDFAF5; font-size: 14px; font-weight: 500; }
+        .chat-header-info p { color: #C4A882; font-size: 11px; }
+        .chat-close { margin-left: auto; background: none; border: none; color: #C4A882; font-size: 18px; cursor: pointer; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; background: #F5F0E8; }
+        .msg { max-width: 82%; padding: 9px 12px; border-radius: 12px; font-size: 13px; line-height: 1.5; }
+        .msg.bot { background: #FDFAF5; color: #3A2E22; border-bottom-left-radius: 4px; align-self: flex-start; border: 0.5px solid #D4C4A8; }
+        .msg.user { background: #5C4A32; color: white; border-bottom-right-radius: 4px; align-self: flex-end; }
+        .typing { display: none; align-items: center; gap: 4px; padding: 9px 12px; background: #FDFAF5; border-radius: 12px; border-bottom-left-radius: 4px; width: fit-content; border: 0.5px solid #D4C4A8; }
+        .typing span { width: 6px; height: 6px; background: #8B6F47; border-radius: 50%; animation: bounce 1s infinite; }
         .typing span:nth-child(2) { animation-delay: 0.2s; }
         .typing span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-6px); } }
-
-        .input-area { background: #FDFAF5; padding: 12px 16px; display: flex; gap: 10px; align-items: center; border-top: 0.5px solid #D4C4A8; }
-        .input-area input { flex: 1; padding: 10px 16px; border: 0.5px solid #D4C4A8; border-radius: 22px; font-size: 14px; outline: none; background: #F5F0E8; color: #3A2E22; }
-        .input-area input:focus { border-color: #8B6F47; background: #FDFAF5; }
-        .input-area button { background: #6B8F5E; color: white; border: none; width: 40px; height: 40px; border-radius: 50%; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; }
-        .input-area button:hover { background: #5C4A32; }
+        @keyframes bounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+        .chat-input-area { padding: 10px 12px; background: #FDFAF5; border-top: 0.5px solid #D4C4A8; display: flex; gap: 8px; }
+        .chat-input-area input { flex: 1; padding: 8px 12px; border: 0.5px solid #D4C4A8; border-radius: 20px; font-size: 13px; outline: none; background: #F5F0E8; color: #3A2E22; }
+        .chat-input-area input:focus { border-color: #8B6F47; }
+        .chat-input-area button { background: #5C4A32; color: white; border: none; width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 14px; }
+        .chat-input-area button:hover { background: #6B8F5E; }
     </style>
 </head>
 <body>
 
+<!-- HEADER -->
 <div class="header">
-    <div class="logo">🏠</div>
+    <a href="/" class="logo" title="Retour à l'accueil">🏠</a>
     <div class="header-info">
         <h1>HomeAssist AI</h1>
         <p>Assistant domestique intelligent — Afrique de l'Ouest</p>
@@ -61,6 +111,7 @@
     </nav>
 </div>
 
+<!-- QUICK ACTIONS -->
 <div class="quick-actions">
     <a href="/artisans" class="qa-btn">
         <span class="icon">🔧</span>
@@ -70,90 +121,274 @@
         <span class="icon">📅</span>
         <span>Réserver un service</span>
     </a>
-    <div class="qa-btn" onclick="sendQuick('J\'ai une panne urgente')">
+    <div class="qa-btn" onclick="openChat('J\'ai une panne urgente')">
         <span class="icon">⚡</span>
         <span>Panne urgente</span>
     </div>
-    <div class="qa-btn" onclick="sendQuick('Je veux gérer mon budget familial')">
+    <div class="qa-btn" onclick="openBudget()">
         <span class="icon">💰</span>
         <span>Mon budget</span>
     </div>
 </div>
 
-<div class="chat-box" id="chatBox">
-    <div class="message bot">
-        👋 Bonjour ! Je suis HomeAssist AI.<br><br>
-        Décrivez votre problème (panne, plomberie, gaz, jardinage, courses...) et je vous aide immédiatement ! 🔧
-    </div>
-    <div class="typing" id="typing">
-        <span></span><span></span><span></span>
+<!-- PAGE CONTENT -->
+<div class="page-content">
+    <div class="welcome-card">
+        <h2>🏡 Bienvenue sur HomeAssist AI</h2>
+        <p>Votre assistant domestique intelligent pour l'Afrique de l'Ouest. Gérez vos équipements, trouvez des artisans vérifiés, réservez des services et gérez votre budget familial — tout en un seul endroit.</p>
+        <div class="service-cards">
+            <a href="/artisans" class="service-card">
+                <span class="icon">🔧</span>
+                <h3>Artisans & Prestataires</h3>
+                <p>Électriciens, plombiers, frigoristes, maçons et plus</p>
+            </a>
+            <a href="/reservation" class="service-card">
+                <span class="icon">🛒</span>
+                <h3>Services à la Personne</h3>
+                <p>Courses, ménage, garde d'enfants, employé(e) de maison</p>
+            </a>
+            <div class="service-card" onclick="openChat('Je veux faire un diagnostic de mon équipement')">
+                <span class="icon">🤖</span>
+                <h3>Diagnostic IA</h3>
+                <p>Décrivez votre panne et obtenez un diagnostic immédiat</p>
+            </div>
+            <div class="service-card" onclick="openBudget()">
+                <span class="icon">💰</span>
+                <h3>Mon Budget</h3>
+                <p>Factures, dépenses, rappels et budget mensuel</p>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="input-area">
-    <input type="text" id="userInput" placeholder="Décrivez votre problème..." />
-    <button onclick="sendMessage()">➤</button>
+<!-- MODAL BUDGET -->
+<div class="modal-overlay" id="budgetModal">
+    <div class="modal">
+        <div class="modal-header">
+            <h2>💰 Mon Budget & Mes Factures</h2>
+            <button class="modal-close" onclick="closeBudget()">✕</button>
+        </div>
+        <div class="modal-body">
+
+            <div class="budget-section">
+                <h3>📊 Budget mensuel</h3>
+                <div class="budget-total">
+                    <div>
+                        <div class="label">Budget total ce mois</div>
+                        <div class="amount" id="totalBudget">0 FCFA</div>
+                    </div>
+                    <div style="text-align:right;">
+                        <div class="label">Dépensé</div>
+                        <div class="amount" style="color:#FAC775;" id="totalDepense">0 FCFA</div>
+                    </div>
+                </div>
+                <input type="number" class="budget-input" id="budgetMensuel" placeholder="Définir mon budget mensuel (FCFA)" onchange="updateBudget()">
+            </div>
+
+            <div class="budget-section">
+                <h3>🧾 Mes Factures</h3>
+                <div class="facture-item">
+                    <div class="facture-label">💧 Eau (SODECI)</div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <input type="number" style="width:100px;padding:4px 8px;border:0.5px solid #D4C4A8;border-radius:6px;font-size:12px;background:#F5F0E8;" placeholder="Montant" id="facEau">
+                        <span class="facture-status status-due" id="statusEau">À payer</span>
+                    </div>
+                </div>
+                <div class="facture-item">
+                    <div class="facture-label">⚡ Électricité (CIE)</div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <input type="number" style="width:100px;padding:4px 8px;border:0.5px solid #D4C4A8;border-radius:6px;font-size:12px;background:#F5F0E8;" placeholder="Montant" id="facElec">
+                        <span class="facture-status status-due" id="statusElec">À payer</span>
+                    </div>
+                </div>
+                <div class="facture-item">
+                    <div class="facture-label">📱 Téléphone / Internet</div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <input type="number" style="width:100px;padding:4px 8px;border:0.5px solid #D4C4A8;border-radius:6px;font-size:12px;background:#F5F0E8;" placeholder="Montant" id="facTel">
+                        <span class="facture-status status-due" id="statusTel">À payer</span>
+                    </div>
+                </div>
+                <div class="facture-item">
+                    <div class="facture-label">🔥 Gaz</div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <input type="number" style="width:100px;padding:4px 8px;border:0.5px solid #D4C4A8;border-radius:6px;font-size:12px;background:#F5F0E8;" placeholder="Montant" id="facGaz">
+                        <span class="facture-status status-due" id="statusGaz">À payer</span>
+                    </div>
+                </div>
+                <button class="add-btn" onclick="marquerPaye()">✅ Marquer tout comme payé</button>
+                <button class="add-btn" style="background:#8B6F47;margin-top:6px;" onclick="calculerTotal()">📊 Calculer le total</button>
+            </div>
+
+            <div class="budget-section">
+                <h3>🔔 Rappels de factures</h3>
+                <div id="rappelsList">
+                    <div class="rappel-item">
+                        <span>💧 Facture eau — fin du mois</span>
+                        <span class="rappel-date">⏰ Dans 5 jours</span>
+                    </div>
+                    <div class="rappel-item">
+                        <span>⚡ Facture électricité — fin du mois</span>
+                        <span class="rappel-date">⏰ Dans 5 jours</span>
+                    </div>
+                    <div class="rappel-item">
+                        <span>📱 Recharge téléphone</span>
+                        <span class="rappel-date">⏰ Cette semaine</span>
+                    </div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:10px;">
+                    <input type="text" class="budget-input" id="newRappel" placeholder="Ajouter un rappel...">
+                    <button class="add-btn" style="width:auto;padding:10px 16px;" onclick="addRappel()">+</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- CHATBOT FLOTTANT -->
+<button class="chat-fab" onclick="toggleChat()" id="chatFab">
+    🤖
+    <span class="notif-dot">1</span>
+</button>
+
+<div class="chat-window" id="chatWindow">
+    <div class="chat-header">
+        <div class="chat-avatar">🏠</div>
+        <div class="chat-header-info">
+            <h3>HomeAssist AI</h3>
+            <p>🟢 En ligne — répond en quelques secondes</p>
+        </div>
+        <button class="chat-close" onclick="toggleChat()">✕</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+        <div class="msg bot">
+            👋 Bonjour ! Je suis HomeAssist AI.<br><br>
+            Décrivez votre problème (panne, plomberie, gaz, jardinage...) et je vous aide immédiatement ! 🔧
+        </div>
+        <div class="typing" id="typing">
+            <span></span><span></span><span></span>
+        </div>
+    </div>
+    <div class="chat-input-area">
+        <input type="text" id="userInput" placeholder="Décrivez votre problème..." />
+        <button onclick="sendMessage()">➤</button>
+    </div>
 </div>
 
 <script>
-    const chatBox = document.getElementById("chatBox");
-    const userInput = document.getElementById("userInput");
-    const typing = document.getElementById("typing");
     let userCity = "";
     let userQuartier = "";
+    let chatOpen = false;
 
+    // Géolocalisation
     async function detectLocation() {
         try {
-            const response = await fetch("https://ipapi.co/json/");
-            const data = await response.json();
+            const res = await fetch("https://ipapi.co/json/");
+            const data = await res.json();
             userCity = data.city || "";
             userQuartier = data.neighbourhood || data.district || "";
             if (userCity) {
-                addMessage(`📍 Localisation détectée : <strong>${userCity}</strong>. Je peux vous recommander des artisans près de chez vous !`, "bot");
+                addMsg(`📍 Localisation détectée : <strong>${userCity}</strong>. Je peux vous recommander des artisans près de chez vous !`, "bot");
             }
-        } catch (error) { console.log("Localisation non disponible"); }
+        } catch(e) {}
     }
-
     detectLocation();
 
-    userInput.addEventListener("keypress", function(e) {
-        if (e.key === "Enter") sendMessage();
-    });
-
-    function addMessage(text, sender) {
-        const msg = document.createElement("div");
-        msg.classList.add("message", sender);
-        msg.innerHTML = text.replace(/\n/g, "<br>");
-        chatBox.insertBefore(msg, typing);
-        chatBox.scrollTop = chatBox.scrollHeight;
+    // Chat FAB
+    function toggleChat() {
+        chatOpen = !chatOpen;
+        document.getElementById("chatWindow").classList.toggle("open", chatOpen);
+        document.getElementById("chatFab").innerHTML = chatOpen ? "✕" : '🤖<span class="notif-dot" style="display:none"></span>';
+        if (chatOpen) document.getElementById("userInput").focus();
     }
 
-    function sendQuick(text) {
-        userInput.value = text;
-        sendMessage();
+    function openChat(msg) {
+        if (!chatOpen) toggleChat();
+        if (msg) {
+            document.getElementById("userInput").value = msg;
+            sendMessage();
+        }
+    }
+
+    // Envoi message
+    document.getElementById("userInput").addEventListener("keypress", e => { if(e.key==="Enter") sendMessage(); });
+
+    function addMsg(text, sender) {
+        const msgs = document.getElementById("chatMessages");
+        const typing = document.getElementById("typing");
+        const div = document.createElement("div");
+        div.className = `msg ${sender}`;
+        div.innerHTML = text.replace(/\n/g, "<br>");
+        msgs.insertBefore(div, typing);
+        msgs.scrollTop = msgs.scrollHeight;
     }
 
     async function sendMessage() {
-        const message = userInput.value.trim();
+        const input = document.getElementById("userInput");
+        const message = input.value.trim();
         if (!message) return;
-        addMessage(message, "user");
-        userInput.value = "";
+        addMsg(message, "user");
+        input.value = "";
+        const typing = document.getElementById("typing");
         typing.style.display = "flex";
-        chatBox.scrollTop = chatBox.scrollHeight;
+        document.getElementById("chatMessages").scrollTop = 99999;
         try {
-            const response = await fetch("/chat", {
+            const res = await fetch("/chat", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message, city: userCity, quartier: userQuartier })
             });
-            const data = await response.json();
+            const data = await res.json();
             typing.style.display = "none";
-            addMessage(data.response, "bot");
-        } catch (error) {
+            addMsg(data.response, "bot");
+        } catch(e) {
             typing.style.display = "none";
-            addMessage("❌ Erreur de connexion. Réessayez.", "bot");
+            addMsg("❌ Erreur de connexion. Réessayez.", "bot");
         }
     }
+
+    // Budget
+    function openBudget() { document.getElementById("budgetModal").classList.add("active"); }
+    function closeBudget() { document.getElementById("budgetModal").classList.remove("active"); }
+
+    function updateBudget() {
+        const val = parseInt(document.getElementById("budgetMensuel").value) || 0;
+        document.getElementById("totalBudget").textContent = val.toLocaleString() + " FCFA";
+    }
+
+    function calculerTotal() {
+        const eau = parseInt(document.getElementById("facEau").value) || 0;
+        const elec = parseInt(document.getElementById("facElec").value) || 0;
+        const tel = parseInt(document.getElementById("facTel").value) || 0;
+        const gaz = parseInt(document.getElementById("facGaz").value) || 0;
+        const total = eau + elec + tel + gaz;
+        document.getElementById("totalDepense").textContent = total.toLocaleString() + " FCFA";
+    }
+
+    function marquerPaye() {
+        ["statusEau","statusElec","statusTel","statusGaz"].forEach(id => {
+            const el = document.getElementById(id);
+            el.textContent = "Payé ✅";
+            el.className = "facture-status status-paid";
+        });
+    }
+
+    function addRappel() {
+        const input = document.getElementById("newRappel");
+        const text = input.value.trim();
+        if (!text) return;
+        const div = document.createElement("div");
+        div.className = "rappel-item";
+        div.innerHTML = `<span>🔔 ${text}</span><span class="rappel-date">⏰ À venir</span>`;
+        document.getElementById("rappelsList").appendChild(div);
+        input.value = "";
+    }
+
+    // Fermer modal en cliquant dehors
+    document.getElementById("budgetModal").addEventListener("click", function(e) {
+        if (e.target === this) closeBudget();
+    });
 </script>
+
 </body>
 </html>
