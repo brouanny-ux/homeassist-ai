@@ -264,6 +264,12 @@ def login():
 def logout():
     session.clear()
     return redirect("/auth")
+@app.route("/me")
+def me():
+    user = session.get('user')
+    if user:
+        return jsonify({"user": user})
+    return jsonify({"user": None})
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
