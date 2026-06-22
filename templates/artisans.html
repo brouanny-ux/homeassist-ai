@@ -7,7 +7,6 @@
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #F5F0E8; min-height: 100vh; }
-
         .header { background: #5C4A32; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
         .logo { width: 38px; height: 38px; background: #8B6F47; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; transition: all .2s; text-decoration: none; }
         .logo:hover { background: #6B8F5E; transform: scale(1.1); }
@@ -16,7 +15,6 @@
         .header-nav { margin-left: auto; display: flex; gap: 4px; }
         .header-nav a { font-size: 12px; color: #C4A882; padding: 6px 12px; border-radius: 8px; text-decoration: none; transition: background .15s; }
         .header-nav a:hover { background: #8B6F47; color: #FDFAF5; }
-
         .hero { background: #5C4A32; padding: 40px 20px; text-align: center; }
         .hero h2 { color: #FDFAF5; font-size: 28px; font-weight: 500; margin-bottom: 8px; }
         .hero p { color: #C4A882; font-size: 14px; margin-bottom: 20px; }
@@ -24,24 +22,17 @@
         .search-bar input { flex: 1; padding: 12px 18px; border: none; border-radius: 10px; font-size: 14px; outline: none; }
         .search-bar button { padding: 12px 24px; background: #6B8F5E; color: white; border: none; border-radius: 10px; font-size: 14px; cursor: pointer; font-weight: 500; }
         .search-bar button:hover { background: #5C4A32; }
-
         .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
-
-        /* GRILLE CATÉGORIES */
         .section-title { font-size: 20px; font-weight: 500; color: #5C4A32; margin-bottom: 20px; }
         .cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 40px; }
-
         .cat-card { position: relative; border-radius: 12px; overflow: hidden; cursor: pointer; height: 160px; transition: transform .2s, box-shadow .2s; }
         .cat-card:hover { transform: translateY(-4px); box-shadow: 0 12px 32px rgba(0,0,0,0.3); }
         .cat-card img { width: 100%; height: 100%; object-fit: cover; transition: transform .3s; }
         .cat-card:hover img { transform: scale(1.05); }
         .cat-card .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.1) 60%); }
-        .cat-card .cat-label { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px 14px; }
+        .cat-card .cat-label { position: absolute; bottom: 0; left: 0; right: 0; padding: 14px; }
         .cat-card .cat-label h3 { color: white; font-size: 14px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
         .cat-card .cat-label p { color: rgba(255,255,255,0.75); font-size: 11px; margin-top: 2px; }
-        .cat-card.active { outline: 3px solid #6B8F5E; }
-
-        /* SOUS-CATÉGORIES */
         .sub-section { display: none; margin-bottom: 40px; }
         .sub-section.active { display: block; }
         .sub-section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
@@ -55,8 +46,6 @@
         .sub-card .overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.1) 60%); }
         .sub-card .sub-label { position: absolute; bottom: 0; left: 0; right: 0; padding: 10px 12px; }
         .sub-card .sub-label h4 { color: white; font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px; }
-
-        /* RÉSULTATS ARTISANS */
         .results-section { display: none; margin-bottom: 40px; }
         .results-section.active { display: block; }
         .artisan-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
@@ -74,7 +63,6 @@
         .btn-call:hover { background: #6B8F5E; }
         .btn-reserve { flex: 1; padding: 9px; background: #E8DCC8; color: #5C4A32; border: 0.5px solid #8B6F47; border-radius: 8px; font-size: 13px; cursor: pointer; text-align: center; text-decoration: none; display: block; }
         .empty { text-align: center; color: #8B6F47; padding: 40px; background: white; border-radius: 12px; border: 0.5px solid #D4C4A8; }
-
         @media (max-width: 768px) {
             .cat-grid { grid-template-columns: repeat(2, 1fr); }
             .sub-grid { grid-template-columns: repeat(2, 1fr); }
@@ -103,20 +91,16 @@
     <h2>🔧 Trouvez le bon prestataire</h2>
     <p>Des artisans vérifiés près de chez vous — Abidjan, Bouaké, Yamoussoukro, Korhogo, Man</p>
     <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Rechercher : électricien, plombier, ménage..." oninput="searchArtisans(this.value)">
+        <input type="text" id="searchInput" placeholder="Rechercher : électricien, plombier, ménage...">
         <button onclick="searchArtisans(document.getElementById('searchInput').value)">🔍 Rechercher</button>
     </div>
 </div>
 
 <div class="container">
-
-    <!-- CATÉGORIES PRINCIPALES -->
     <div id="mainSection">
         <p class="section-title">Nos catégories de services</p>
         <div class="cat-grid" id="catGrid"></div>
     </div>
-
-    <!-- SOUS-CATÉGORIES -->
     <div class="sub-section" id="subSection">
         <div class="sub-section-header">
             <button class="back-btn" onclick="showMain()">← Retour</button>
@@ -124,8 +108,6 @@
         </div>
         <div class="sub-grid" id="subGrid"></div>
     </div>
-
-    <!-- RÉSULTATS ARTISANS -->
     <div class="results-section" id="resultsSection">
         <div class="sub-section-header">
             <button class="back-btn" onclick="showSub()">← Retour</button>
@@ -133,7 +115,6 @@
         </div>
         <div class="artisan-grid" id="artisanGrid"></div>
     </div>
-
 </div>
 
 <script>
@@ -154,12 +135,12 @@ const categories = [
         { label: "Chauffe-eau", img: "/static/cat_plomberie.jpg", spec: "Plombier" },
       ]
     },
-    { id: "froid", label: "Froid & Clim", desc: "Climatisation & réfrigération", img: "/static/cat_froid.jpg",
+    { id: "froid", label: "Froid & Clim", desc: "Climatisation & réfrigération", img: "/static/cat_Froid.jpg",
       subs: [
-        { label: "Climatiseur", img: "/static/cat_froid.jpg", spec: "Frigoriste" },
-        { label: "Réfrigérateur", img: "/static/cat_froid.jpg", spec: "Frigoriste" },
-        { label: "Congélateur", img: "/static/cat_froid.jpg", spec: "Frigoriste" },
-        { label: "Ventilateur", img: "/static/cat_froid.jpg", spec: "Frigoriste" },
+        { label: "Climatiseur", img: "/static/cat_Froid.jpg", spec: "Frigoriste" },
+        { label: "Réfrigérateur", img: "/static/cat_Froid.jpg", spec: "Frigoriste" },
+        { label: "Congélateur", img: "/static/cat_Froid.jpg", spec: "Frigoriste" },
+        { label: "Ventilateur", img: "/static/cat_Froid.jpg", spec: "Frigoriste" },
       ]
     },
     { id: "gaz", label: "Gaz", desc: "Recharge & réparations", img: "/static/cat_gaz.jpg",
@@ -170,12 +151,12 @@ const categories = [
         { label: "Installation gaz", img: "/static/cat_gaz.jpg", spec: "gaz" },
       ]
     },
-    { id: "maconnerie", label: "Maçonnerie", desc: "Construction & rénovation", img: "/static/cat_maconnerie.jpg",
+    { id: "maconnerie", label: "Maçonnerie", desc: "Construction & rénovation", img: "/static/cat_ma%C3%A7onnerie.jpg",
       subs: [
-        { label: "Fissures & murs", img: "/static/cat_maconnerie.jpg", spec: "Macon" },
-        { label: "Carrelage", img: "/static/cat_maconnerie.jpg", spec: "Macon" },
-        { label: "Peinture", img: "/static/cat_maconnerie.jpg", spec: "Macon" },
-        { label: "Toiture", img: "/static/cat_maconnerie.jpg", spec: "Macon" },
+        { label: "Fissures & murs", img: "/static/cat_ma%C3%A7onnerie.jpg", spec: "Macon" },
+        { label: "Carrelage", img: "/static/cat_ma%C3%A7onnerie.jpg", spec: "Macon" },
+        { label: "Peinture", img: "/static/cat_ma%C3%A7onnerie.jpg", spec: "Macon" },
+        { label: "Toiture", img: "/static/cat_ma%C3%A7onnerie.jpg", spec: "Macon" },
       ]
     },
     { id: "menuiserie", label: "Menuiserie", desc: "Bois & mobilier", img: "/static/cat_menuiserie.jpg",
@@ -186,28 +167,28 @@ const categories = [
         { label: "Volet & store", img: "/static/cat_menuiserie.jpg", spec: "Menuisier" },
       ]
     },
-    { id: "jardinage", label: "Jardinage", desc: "Entretien & espaces verts", img: "/static/cat_jardinage.jpg",
+    { id: "jardinage", label: "Jardinage", desc: "Entretien & espaces verts", img: "/static/cat_jadinage.jpg",
       subs: [
-        { label: "Taille & élagage", img: "/static/cat_jardinage.jpg", spec: "Jardinier" },
-        { label: "Pelouse & gazon", img: "/static/cat_jardinage.jpg", spec: "Jardinier" },
-        { label: "Plantes malades", img: "/static/cat_jardinage.jpg", spec: "Jardinier" },
-        { label: "Aménagement jardin", img: "/static/cat_jardinage.jpg", spec: "Jardinier" },
+        { label: "Taille & élagage", img: "/static/cat_jadinage.jpg", spec: "Jardinier" },
+        { label: "Pelouse & gazon", img: "/static/cat_jadinage.jpg", spec: "Jardinier" },
+        { label: "Plantes malades", img: "/static/cat_jadinage.jpg", spec: "Jardinier" },
+        { label: "Aménagement jardin", img: "/static/cat_jadinage.jpg", spec: "Jardinier" },
       ]
     },
-    { id: "menage", label: "Ménage", desc: "Nettoyage & entretien", img: "/static/cat_menage.jpg",
+    { id: "menage", label: "Ménage", desc: "Nettoyage & entretien", img: "/static/cat_menage_1.jpg",
       subs: [
-        { label: "Nettoyage complet", img: "/static/cat_menage.jpg", spec: "nage" },
-        { label: "Repassage", img: "/static/cat_menage.jpg", spec: "nage" },
-        { label: "Lessive", img: "/static/cat_menage.jpg", spec: "nage" },
-        { label: "Cuisine & rangement", img: "/static/cat_menage.jpg", spec: "nage" },
+        { label: "Nettoyage complet", img: "/static/cat_menage_1.jpg", spec: "nage" },
+        { label: "Repassage", img: "/static/cat_menage_1.jpg", spec: "nage" },
+        { label: "Lessive", img: "/static/cat_menage_1.jpg", spec: "nage" },
+        { label: "Cuisine & rangement", img: "/static/cat_menage_1.jpg", spec: "nage" },
       ]
     },
-    { id: "courses", label: "Courses", desc: "Marché & commissions", img: "/static/cat_courses.jpg",
+    { id: "courses", label: "Courses", desc: "Marché & commissions", img: "/static/cat_course.jpg",
       subs: [
-        { label: "Marché traditionnel", img: "/static/cat_courses.jpg", spec: "Coursier" },
-        { label: "Supermarché", img: "/static/cat_courses.jpg", spec: "Coursier" },
-        { label: "Pharmacie", img: "/static/cat_courses.jpg", spec: "Coursier" },
-        { label: "Commissions diverses", img: "/static/cat_courses.jpg", spec: "Coursier" },
+        { label: "Marché traditionnel", img: "/static/cat_course.jpg", spec: "Coursier" },
+        { label: "Supermarché", img: "/static/cat_course.jpg", spec: "Coursier" },
+        { label: "Pharmacie", img: "/static/cat_course.jpg", spec: "Coursier" },
+        { label: "Commissions diverses", img: "/static/cat_course.jpg", spec: "Coursier" },
       ]
     },
     { id: "garde", label: "Garde d'enfants", desc: "Baby-sitting & accompagnement", img: "/static/cat_garde.jpg",
@@ -228,145 +209,21 @@ const categories = [
     },
     { id: "demenagement", label: "Déménagement", desc: "Transport & manutention", img: "/static/cat_demenagement.jpg",
       subs: [
-        { label: "Déménagement complet", img: "/static/cat_demenagement.jpg", spec: "D\u00e9m\u00e9nagement" },
-        { label: "Transport de meubles", img: "/static/cat_demenagement.jpg", spec: "D\u00e9m\u00e9nagement" },
-        { label: "Manutention", img: "/static/cat_demenagement.jpg", spec: "D\u00e9m\u00e9nagement" },
-        { label: "Livraison", img: "/static/cat_demenagement.jpg", spec: "D\u00e9m\u00e9nagement" },
+        { label: "Déménagement complet", img: "/static/cat_demenagement.jpg", spec: "Déménagement" },
+        { label: "Transport de meubles", img: "/static/cat_demenagement.jpg", spec: "Déménagement" },
+        { label: "Manutention", img: "/static/cat_demenagement.jpg", spec: "Déménagement" },
+        { label: "Livraison", img: "/static/cat_demenagement.jpg", spec: "Déménagement" },
       ]
-    },
-];
-    {
-        id: "electricite", label: "Électricité", desc: "Installations & réparations",
-        img: UNSPLASH + "photo-1621905251189-08b1058e6c7a?w=400&q=80",
-        subs: [
-            { label: "Installation électrique", img: UNSPLASH + "photo-1555664424-778a1e5e1b48?w=400&q=80", spec: "lectricien" },
-            { label: "Panne de courant", img: UNSPLASH + "photo-1558618666-fcd25c85cd64?w=400&q=80", spec: "lectricien" },
-            { label: "Disjoncteur", img: UNSPLASH + "photo-1504917595217-d4dc5ebe6122?w=400&q=80", spec: "lectricien" },
-            { label: "Éclairage & prises", img: UNSPLASH + "photo-1565193566173-7a0ee3dbe261?w=400&q=80", spec: "lectricien" },
-        ]
-    },
-    {
-        id: "plomberie", label: "Plomberie", desc: "Fuites & installations",
-        img: UNSPLASH + "photo-1607472586893-edb57bdc0e39?w=400&q=80",
-        subs: [
-            { label: "Robinet & fuite", img: UNSPLASH + "photo-1585771724684-38269d6639fd?w=400&q=80", spec: "Plombier" },
-            { label: "WC & lavabo", img: UNSPLASH + "photo-1552321554-5fefe8c9ef14?w=400&q=80", spec: "Plombier" },
-            { label: "Pompe à eau", img: UNSPLASH + "photo-1504328345606-18bbc8c9d7d1?w=400&q=80", spec: "Plombier" },
-            { label: "Chauffe-eau", img: UNSPLASH + "photo-1558618047-3c8c76ca7d13?w=400&q=80", spec: "Plombier" },
-        ]
-    },
-    {
-        id: "froid", label: "Froid & Clim", desc: "Climatisation & réfrigération",
-        img: UNSPLASH + "photo-1581275238484-89b1f9a5f87d?w=400&q=80",
-        subs: [
-            { label: "Climatiseur", img: UNSPLASH + "photo-1620389219000-e1df63bbba01?w=400&q=80", spec: "Frigoriste" },
-            { label: "Réfrigérateur", img: UNSPLASH + "photo-1584568694244-14fbdf83bd30?w=400&q=80", spec: "Frigoriste" },
-            { label: "Congélateur", img: UNSPLASH + "photo-1571175443880-49e1d25b2bc5?w=400&q=80", spec: "Frigoriste" },
-            { label: "Ventilateur", img: UNSPLASH + "photo-1558618666-fcd25c85cd64?w=400&q=80", spec: "Frigoriste" },
-        ]
-    },
-    {
-        id: "gaz", label: "Gaz", desc: "Recharge & réparations",
-        img: UNSPLASH + "photo-1585771724684-38269d6639fd?w=400&q=80",
-        subs: [
-            { label: "Recharge bouteille", img: UNSPLASH + "photo-1504328345606-18bbc8c9d7d1?w=400&q=80", spec: "gaz" },
-            { label: "Fuite de gaz", img: UNSPLASH + "photo-1558618047-3c8c76ca7d13?w=400&q=80", spec: "gaz" },
-            { label: "Réchaud & cuisinière", img: UNSPLASH + "photo-1556909114-f6e7ad7d3136?w=400&q=80", spec: "gaz" },
-            { label: "Installation gaz", img: UNSPLASH + "photo-1565193566173-7a0ee3dbe261?w=400&q=80", spec: "gaz" },
-        ]
-    },
-    {
-        id: "maconnerie", label: "Maçonnerie", desc: "Construction & rénovation",
-        img: UNSPLASH + "photo-1504307651254-35680f356dfd?w=400&q=80",
-        subs: [
-            { label: "Fissures & murs", img: UNSPLASH + "photo-1589939705384-5185137a7f0f?w=400&q=80", spec: "Macon" },
-            { label: "Carrelage", img: UNSPLASH + "photo-1558618666-fcd25c85cd64?w=400&q=80", spec: "Macon" },
-            { label: "Peinture", img: UNSPLASH + "photo-1562259929-b4e1fd3aef09?w=400&q=80", spec: "Macon" },
-            { label: "Toiture", img: UNSPLASH + "photo-1504307651254-35680f356dfd?w=400&q=80", spec: "Macon" },
-        ]
-    },
-    {
-        id: "menuiserie", label: "Menuiserie", desc: "Bois & mobilier",
-        img: UNSPLASH + "photo-1504328345606-18bbc8c9d7d1?w=400&q=80",
-        subs: [
-            { label: "Porte & fenêtre", img: UNSPLASH + "photo-1558618047-3c8c76ca7d13?w=400&q=80", spec: "Menuisier" },
-            { label: "Meuble sur mesure", img: UNSPLASH + "photo-1555041469-a586c61ea9bc?w=400&q=80", spec: "Menuisier" },
-            { label: "Vitrier", img: UNSPLASH + "photo-1565193566173-7a0ee3dbe261?w=400&q=80", spec: "Vitrier" },
-            { label: "Volet & store", img: UNSPLASH + "photo-1571175443880-49e1d25b2bc5?w=400&q=80", spec: "Menuisier" },
-        ]
-    },
-    {
-        id: "jardinage", label: "Jardinage", desc: "Entretien & espaces verts",
-        img: UNSPLASH + "photo-1416879595882-3373a0480b5b?w=400&q=80",
-        subs: [
-            { label: "Taille & élagage", img: UNSPLASH + "photo-1416879595882-3373a0480b5b?w=400&q=80", spec: "Jardinier" },
-            { label: "Pelouse & gazon", img: UNSPLASH + "photo-1558904541-efa843a96f01?w=400&q=80", spec: "Jardinier" },
-            { label: "Plantes malades", img: UNSPLASH + "photo-1463936575829-25148e1db1b8?w=400&q=80", spec: "Jardinier" },
-            { label: "Aménagement jardin", img: UNSPLASH + "photo-1585320806297-9794b3e4eeae?w=400&q=80", spec: "Jardinier" },
-        ]
-    },
-    {
-        id: "menage", label: "Ménage", desc: "Nettoyage & entretien",
-        img: UNSPLASH + "photo-1563453392212-326f5e854473?w=400&q=80",
-        subs: [
-            { label: "Nettoyage complet", img: UNSPLASH + "photo-1563453392212-326f5e854473?w=400&q=80", spec: "nage" },
-            { label: "Repassage", img: UNSPLASH + "photo-1558618666-fcd25c85cd64?w=400&q=80", spec: "nage" },
-            { label: "Lessive", img: UNSPLASH + "photo-1545173168-9f1947eebb7f?w=400&q=80", spec: "nage" },
-            { label: "Cuisine & rangement", img: UNSPLASH + "photo-1556909114-f6e7ad7d3136?w=400&q=80", spec: "nage" },
-        ]
-    },
-    {
-        id: "courses", label: "Courses", desc: "Marché & commissions",
-        img: UNSPLASH + "photo-1542838132-92c53300491e?w=400&q=80",
-        subs: [
-            { label: "Marché traditionnel", img: UNSPLASH + "photo-1542838132-92c53300491e?w=400&q=80", spec: "Coursier" },
-            { label: "Supermarché", img: UNSPLASH + "photo-1608198093002-ad4e005484ec?w=400&q=80", spec: "Coursier" },
-            { label: "Pharmacie", img: UNSPLASH + "photo-1584308666744-24d5c474f2ae?w=400&q=80", spec: "Coursier" },
-            { label: "Commissions diverses", img: UNSPLASH + "photo-1556742049-0cfed4f6a45d?w=400&q=80", spec: "Coursier" },
-        ]
-    },
-    {
-        id: "garde", label: "Garde d'enfants", desc: "Baby-sitting & accompagnement",
-        img: UNSPLASH + "photo-1587654780291-39c9404d746b?w=400&q=80",
-        subs: [
-            { label: "Baby-sitting", img: UNSPLASH + "photo-1587654780291-39c9404d746b?w=400&q=80", spec: "Garde" },
-            { label: "Accompagnement scolaire", img: UNSPLASH + "photo-1503676260728-1c00da094a0b?w=400&q=80", spec: "Garde" },
-            { label: "Aide personnes âgées", img: UNSPLASH + "photo-1516307365426-bea591f05011?w=400&q=80", spec: "Garde" },
-            { label: "Garde de nuit", img: UNSPLASH + "photo-1491013516836-7db643ee125a?w=400&q=80", spec: "Garde" },
-        ]
-    },
-    {
-        id: "employe", label: "Employé(e) de maison", desc: "Ménage + garde + cuisine",
-        img: UNSPLASH + "photo-1534939561126-855b8675edd7?w=400&q=80",
-        subs: [
-            { label: "Ménage + garde enfants", img: UNSPLASH + "photo-1563453392212-326f5e854473?w=400&q=80", spec: "maison" },
-            { label: "Ménage + cuisine", img: UNSPLASH + "photo-1556909114-f6e7ad7d3136?w=400&q=80", spec: "maison" },
-            { label: "Toutes tâches", img: UNSPLASH + "photo-1534939561126-855b8675edd7?w=400&q=80", spec: "maison" },
-            { label: "Contrat long terme", img: UNSPLASH + "photo-1507003211169-0a1dd7228f2d?w=400&q=80", spec: "maison" },
-        ]
-    },
-    {
-        id: "demenagement", label: "Déménagement", desc: "Transport & manutention",
-        img: UNSPLASH + "photo-1600585152220-90363fe7e115?w=400&q=80",
-        subs: [
-            { label: "Déménagement complet", img: UNSPLASH + "photo-1600585152220-90363fe7e115?w=400&q=80", spec: "D\u00e9m\u00e9nagement" },
-            { label: "Transport de meubles", img: UNSPLASH + "photo-1555041469-a586c61ea9bc?w=400&q=80", spec: "D\u00e9m\u00e9nagement" },
-            { label: "Manutention", img: UNSPLASH + "photo-1504307651254-35680f356dfd?w=400&q=80", spec: "D\u00e9m\u00e9nagement" },
-            { label: "Livraison", img: UNSPLASH + "photo-1608198093002-ad4e005484ec?w=400&q=80", spec: "D\u00e9m\u00e9nagement" },
-        ]
     },
 ];
 
 let currentCat = null;
-let currentSub = null;
-let allArtisans = [];
 
-// Construire la grille des catégories
 function buildCatGrid() {
     const grid = document.getElementById("catGrid");
     grid.innerHTML = categories.map(cat => `
         <div class="cat-card" onclick="showSubs('${cat.id}')">
-            <img src="${cat.img}" alt="${cat.label}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80'">
+            <img src="${cat.img}" alt="${cat.label}" loading="lazy">
             <div class="overlay"></div>
             <div class="cat-label">
                 <h3>${cat.label}</h3>
@@ -376,36 +233,28 @@ function buildCatGrid() {
     `).join("");
 }
 
-// Afficher sous-catégories
 function showSubs(catId) {
     currentCat = categories.find(c => c.id === catId);
     document.getElementById("mainSection").style.display = "none";
     document.getElementById("subSection").classList.add("active");
     document.getElementById("resultsSection").classList.remove("active");
     document.getElementById("subTitle").textContent = currentCat.label;
-
     const grid = document.getElementById("subGrid");
     grid.innerHTML = currentCat.subs.map(sub => `
         <div class="sub-card" onclick="showArtisans('${sub.spec}', '${sub.label}')">
-            <img src="${sub.img}" alt="${sub.label}" loading="lazy" onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80'">
+            <img src="${sub.img}" alt="${sub.label}" loading="lazy">
             <div class="overlay"></div>
-            <div class="sub-label">
-                <h4>${sub.label}</h4>
-            </div>
+            <div class="sub-label"><h4>${sub.label}</h4></div>
         </div>
     `).join("");
 }
 
-// Afficher artisans
 async function showArtisans(spec, label) {
-    currentSub = label;
     document.getElementById("subSection").classList.remove("active");
     document.getElementById("resultsSection").classList.add("active");
     document.getElementById("resultsTitle").textContent = label;
-
     const grid = document.getElementById("artisanGrid");
     grid.innerHTML = `<div class="empty">🔍 Recherche en cours...</div>`;
-
     try {
         const res = await fetch("/chercher_artisans", {
             method: "POST",
@@ -422,11 +271,7 @@ async function showArtisans(spec, label) {
 function afficherArtisans(artisans, label) {
     const grid = document.getElementById("artisanGrid");
     if (!artisans.length) {
-        grid.innerHTML = `
-            <div class="empty" style="grid-column:1/-1;">
-                😔 Aucun artisan disponible pour "${label}" pour le moment.<br><br>
-                <a href="/inscription" style="color:#5C4A32;font-weight:500;">Vous êtes artisan ? Inscrivez-vous !</a>
-            </div>`;
+        grid.innerHTML = `<div class="empty" style="grid-column:1/-1;">😔 Aucun artisan disponible pour "${label}".<br><br><a href="/inscription" style="color:#5C4A32;font-weight:500;">Vous êtes artisan ? Inscrivez-vous !</a></div>`;
         return;
     }
     grid.innerHTML = artisans.map(a => `
@@ -451,17 +296,14 @@ function afficherArtisans(artisans, label) {
     `).join("");
 }
 
-// Recherche directe
 async function searchArtisans(query) {
     if (!query.trim()) { showMain(); return; }
     document.getElementById("mainSection").style.display = "none";
     document.getElementById("subSection").classList.remove("active");
     document.getElementById("resultsSection").classList.add("active");
     document.getElementById("resultsTitle").textContent = `Résultats pour "${query}"`;
-
     const grid = document.getElementById("artisanGrid");
     grid.innerHTML = `<div class="empty">🔍 Recherche en cours...</div>`;
-
     try {
         const res = await fetch("/chercher_artisans", {
             method: "POST",
