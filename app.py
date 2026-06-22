@@ -9,6 +9,7 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 
+app.secret_key = "homeassist_secret_2026"
 historique = []
 
 def chercher_artisans(ville, specialite, quartier=""):
@@ -201,6 +202,68 @@ def toggle_artisan():
     conn.commit()
     conn.close()
     return jsonify({"success": True})
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask import session
+
+@app.route("/auth")
+def auth():
+    return render_template("auth.html")
+
+@app.route("/register", methods=["POST"])
+def register():
+    data = request.json
+    conn = sqlite3.connect("homeassist.db")
+    cursor = conn.cursor()
+    try:
+        password_hash = generate_password_hash(data.get("password"))
+        cursor.execute("""
+            INSERT INTO users (prenom, nom, email, telephone, ville, quartier, password_hash)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (
+            data.get("prenom"), data.get("nom"), data.get("email"),
+            data.get("telephone"), data.get("ville"), data.get("quartier"),
+            password_hash
+        ))
+        conn.commit()
+        session['user'] = {
+            'email': data.get("email"),
+            'prenom': data.get("prenom"),
+            'ville': data.get("ville"),
+            'quartier': data.get("quartier")
+        }
+        return jsonify({"success": True})
+    except Exception as e:
+        if "UNIQUE" in str(e):
+            return jsonify({"success": False, "error": "Cet email est déjà utilisé"})
+        return jsonify({"success": False, "error": str(e)})
+    finally:
+        conn.close()
+
+@app.route("/login", methods=["POST"])
+def login():
+    data = request.json
+    email = data.get("email")
+    password = data.get("password")
+    conn = sqlite3.connect("homeassist.db")
+    conn.row_factory = sqlite3.Row
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM users WHERE email = ? OR telephone = ?", (email, email))
+    user = cursor.fetchone()
+    conn.close()
+    if user and check_password_hash(user["password_hash"], password):
+        session['user'] = {
+            'email': user["email"],
+            'prenom': user["prenom"],
+            'ville': user["ville"],
+            'quartier': user["quartier"]
+        }
+        return jsonify({"success": True})
+    return jsonify({"success": False, "error": "Email ou mot de passe incorrect"})
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect("/auth")
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

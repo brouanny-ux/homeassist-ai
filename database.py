@@ -47,7 +47,27 @@ def init_reservations():
     conn.commit()
     conn.close()
     print("Table réservations OK !")
+def init_users():
+    conn = sqlite3.connect("homeassist.db")
+    cursor = conn.cursor()
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS users (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            prenom TEXT NOT NULL,
+            nom TEXT NOT NULL,
+            email TEXT UNIQUE NOT NULL,
+            telephone TEXT NOT NULL,
+            ville TEXT NOT NULL,
+            quartier TEXT,
+            password_hash TEXT NOT NULL,
+            date_inscription TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+ """)
+    conn.commit()
+    conn.close()
+    print("Table users OK !")
 
 if __name__ == "__main__":
     init_db()
     init_reservations()
+    init_users()
