@@ -87,13 +87,37 @@
             </div>
         </div>
 
-        <div class="form-group">
-            <label>Téléphone *</label>
-            <div class="input-icon">
-                <span class="icon-left">📱</span>
-                <input type="tel" id="reg-tel" placeholder="+225 07 00 00 00 00">
-            </div>
+       <div class="form-group">
+    <label>Pays *</label>
+    <select id="reg-pays" onchange="updateIndicatif()">
+        <option value="">Choisir votre pays</option>
+        <option value="CI" data-indicatif="+225">🇨🇮 Côte d'Ivoire (+225)</option>
+        <option value="BF" data-indicatif="+226">🇧🇫 Burkina Faso (+226)</option>
+        <option value="SN" data-indicatif="+221">🇸🇳 Sénégal (+221)</option>
+        <option value="ML" data-indicatif="+223">🇲🇱 Mali (+223)</option>
+        <option value="TG" data-indicatif="+228">🇹🇬 Togo (+228)</option>
+        <option value="BJ" data-indicatif="+229">🇧🇯 Bénin (+229)</option>
+        <option value="GN" data-indicatif="+224">🇬🇳 Guinée (+224)</option>
+        <option value="GH" data-indicatif="+233">🇬🇭 Ghana (+233)</option>
+        <option value="NG" data-indicatif="+234">🇳🇬 Nigeria (+234)</option>
+        <option value="CM" data-indicatif="+237">🇨🇲 Cameroun (+237)</option>
+        <option value="GA" data-indicatif="+241">🇬🇦 Gabon (+241)</option>
+        <option value="CD" data-indicatif="+243">🇨🇩 RD Congo (+243)</option>
+        <option value="MA" data-indicatif="+212">🇲🇦 Maroc (+212)</option>
+        <option value="FR" data-indicatif="+33">🇫🇷 France (+33)</option>
+        <option value="OTHER" data-indicatif="+">🌍 Autre pays</option>
+    </select>
+</div>
+
+<div class="form-group">
+    <label>Téléphone *</label>
+    <div style="display:flex; gap:8px;">
+        <div style="width:90px; flex-shrink:0;">
+            <input type="text" id="reg-indicatif" placeholder="+225" readonly style="background:#E8DCC8; color:#5C4A32; font-weight:500; text-align:center; cursor:default;">
         </div>
+        <input type="tel" id="reg-tel" placeholder="07 00 00 00 00" style="flex:1;">
+    </div>
+</div>
 
         <div class="form-row">
             <div class="form-group">
@@ -195,7 +219,10 @@ async function inscrire() {
     const prenom = document.getElementById('reg-prenom').value.trim();
     const nom = document.getElementById('reg-nom').value.trim();
     const email = document.getElementById('reg-email').value.trim();
-    const tel = document.getElementById('reg-tel').value.trim();
+    const pays = document.getElementById('reg-pays').value;
+const indicatif = document.getElementById('reg-indicatif').value.trim();
+const telNum = document.getElementById('reg-tel').value.trim();
+const tel = indicatif + ' ' + telNum;
     const ville = document.getElementById('reg-ville').value;
     const quartier = document.getElementById('reg-quartier').value.trim();
     const password = document.getElementById('reg-password').value;
@@ -206,7 +233,7 @@ async function inscrire() {
     errDiv.style.display = 'none';
     sucDiv.style.display = 'none';
 
-    if (!prenom || !nom || !email || !tel || !ville || !password) {
+    if (!prenom || !nom || !email || !pays || !telNum || !ville || !password) {
         errDiv.textContent = '⚠️ Veuillez remplir tous les champs obligatoires (*)';
         errDiv.style.display = 'block'; return;
     }
@@ -227,7 +254,7 @@ async function inscrire() {
         const res = await fetch('/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ prenom, nom, email, telephone: tel, ville, quartier, password })
+            body: JSON.stringify({ prenom, nom, email, telephone: tel, pays, ville, quartier, password })
         });
         const data = await res.json();
         if (data.success) {

@@ -1,6 +1,7 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, session, redirect
 from groq import Groq
 from dotenv import load_dotenv
+from werkzeug.security import generate_password_hash, check_password_hash
 import os
 import sqlite3
 
@@ -8,8 +9,8 @@ load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
-
 app.secret_key = "homeassist_secret_2026"
+
 historique = []
 
 def chercher_artisans(ville, specialite, quartier=""):
@@ -73,8 +74,6 @@ def chat():
     artisans_info = ""
     if "ARTISAN_NEEDED:" in reply:
         specialite = reply.split("ARTISAN_NEEDED:")[-1].strip().split("\n")[0].strip()
-        print(f"Spécialité détectée : {specialite}")
-        print(f"Ville détectée : {user_city}")
         reply = reply.replace(f"ARTISAN_NEEDED: {specialite}", "").strip()
         specialite_search = specialite.replace("É", "").replace("é", "").replace("È", "").replace("è", "")
         specialite_search = specialite_search[1:] if specialite_search else specialite
@@ -87,7 +86,7 @@ def chat():
                     artisans_info += f" — {a[4]}"
                 artisans_info += "\n"
         else:
-            artisans_info = "\n\n⚠️ Aucun artisan disponible dans votre ville pour le moment. Nous allons vous en trouver un très bientôt !"
+            artisans_info = "\n\n⚠️ Aucun artisan disponible dans votre ville pour le moment."
     return jsonify({"response": reply + artisans_info})
 
 @app.route("/inscription")
@@ -202,8 +201,6 @@ def toggle_artisan():
     conn.commit()
     conn.close()
     return jsonify({"success": True})
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask import session
 
 @app.route("/auth")
 def auth():
@@ -217,17 +214,18 @@ def register():
     try:
         password_hash = generate_password_hash(data.get("password"))
         cursor.execute("""
-            INSERT INTO users (prenom, nom, email, telephone, ville, quartier, password_hash)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (prenom, nom, email, telephone, pays, ville, quartier, password_hash)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """, (
             data.get("prenom"), data.get("nom"), data.get("email"),
-            data.get("telephone"), data.get("ville"), data.get("quartier"),
-            password_hash
+            data.get("telephone"), data.get("pays"), data.get("ville"),
+            data.get("quartier"), password_hash
         ))
         conn.commit()
         session['user'] = {
             'email': data.get("email"),
             'prenom': data.get("prenom"),
+            'nom': data.get("nom"),
             'ville': data.get("ville"),
             'quartier': data.get("quartier")
         }
@@ -254,6 +252,7 @@ def login():
         session['user'] = {
             'email': user["email"],
             'prenom': user["prenom"],
+            'nom': user["nom"],
             'ville': user["ville"],
             'quartier': user["quartier"]
         }
@@ -264,6 +263,7 @@ def login():
 def logout():
     session.clear()
     return redirect("/auth")
+
 @app.route("/me")
 def me():
     user = session.get('user')

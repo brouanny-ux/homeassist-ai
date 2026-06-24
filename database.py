@@ -59,6 +59,7 @@ def init_users():
             telephone TEXT NOT NULL,
             ville TEXT NOT NULL,
             quartier TEXT,
+            pays TEXT,
             password_hash TEXT NOT NULL,
             date_inscription TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
