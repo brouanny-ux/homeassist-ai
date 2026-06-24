@@ -308,13 +308,42 @@
         if (chatOpen) document.getElementById("userInput").focus();
     }
 
-    function openChat(msg) {
-        if (!chatOpen) toggleChat();
+   async function openChat(msg) {
+    if (!chatOpen) toggleChat();
+    if (msg === "J'ai une panne urgente") {
+        // Afficher message d'urgence immédiatement
+        addMsg("🚨 PANNE URGENTE détectée ! Recherche d'artisans disponibles près de chez vous...", "bot");
+        
+        // Chercher artisans toutes spécialités
+        try {
+            const res = await fetch("/chercher_artisans", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ ville: userCity, quartier: userQuartier, specialite: "" })
+            });
+            const data = await res.json();
+            if (data.artisans.length > 0) {
+                let reply = "📋 **Artisans disponibles près de chez vous :**\n\n";
+                data.artisans.slice(0, 3).forEach(a => {
+                    reply += `🔧 **${a.nom} ${a.prenom}** — ${a.specialite}\n`;
+                    reply += `📍 ${a.ville}${a.quartier ? ' — ' + a.quartier : ''}\n`;
+                    reply += `📞 ${a.telephone}\n\n`;
+                });
+                reply += "Décrivez votre panne et je vous aide à diagnostiquer ! 👇";
+                addMsg(reply, "bot");
+            } else {
+                addMsg("⚠️ Aucun artisan disponible dans votre zone pour le moment.\n\nDécrivez votre panne et je vais vous aider à diagnostiquer le problème !", "bot");
+            }
+        } catch(e) {
+            addMsg("⚠️ Décrivez votre panne urgente et je vous aide immédiatement !", "bot");
+        }
+    } else {
         if (msg) {
             document.getElementById("userInput").value = msg;
             sendMessage();
         }
     }
+}
 
     // Envoi message
     document.getElementById("userInput").addEventListener("keypress", e => { if(e.key==="Enter") sendMessage(); });
