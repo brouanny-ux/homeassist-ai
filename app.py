@@ -52,6 +52,8 @@ ARTISAN_NEEDED: [type d'artisan en un mot, ex: Electricien, Plombier, Frigoriste
 
 @app.route("/")
 def home():
+    if not session.get('user'):
+        return redirect("/auth")
     return render_template("index.html")
 
 @app.route("/chat", methods=["POST"])
