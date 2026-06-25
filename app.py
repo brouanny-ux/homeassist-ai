@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template, session, redirect
 from groq import Groq
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
+from database import get_conn, is_pg
 import os
 import sqlite3
 
@@ -14,23 +15,24 @@ app.secret_key = "homeassist_secret_2026"
 historique = []
 
 def chercher_artisans(ville, specialite, quartier=""):
-    conn = sqlite3.connect("homeassist.db")
+    conn = get_conn()
     cursor = conn.cursor()
+    ph = "%s" if is_pg() else "?"
     if quartier:
-        cursor.execute("""
+        cursor.execute(f"""
             SELECT nom, prenom, telephone, specialite, quartier
             FROM artisans
-            WHERE ville LIKE ? AND specialite LIKE ? AND quartier LIKE ?
+            WHERE ville LIKE {ph} AND specialite LIKE {ph} AND quartier LIKE {ph}
             AND disponible = 1 LIMIT 3
         """, (f"%{ville}%", f"%{specialite}%", f"%{quartier}%"))
         artisans = cursor.fetchall()
         if artisans:
             conn.close()
             return artisans
-    cursor.execute("""
+    cursor.execute(f"""
         SELECT nom, prenom, telephone, specialite, quartier
         FROM artisans
-        WHERE ville LIKE ? AND specialite LIKE ?
+        WHERE ville LIKE {ph} AND specialite LIKE {ph}
         AND disponible = 1 LIMIT 3
     """, (f"%{ville}%", f"%{specialite}%"))
     artisans = cursor.fetchall()
@@ -98,11 +100,12 @@ def inscription():
 @app.route("/inscrire", methods=["POST"])
 def inscrire():
     data = request.json
-    conn = sqlite3.connect("homeassist.db")
+    conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("""
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"""
         INSERT INTO artisans (nom, prenom, telephone, email, ville, quartier, specialite, experience)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES ({ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph})
     """, (
         data.get("nom"), data.get("prenom"), data.get("telephone"),
         data.get("email"), data.get("ville"), data.get("quartier"),
@@ -119,13 +122,14 @@ def reservation():
 @app.route("/reserver", methods=["POST"])
 def reserver():
     data = request.json
-    conn = sqlite3.connect("homeassist.db")
+    conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("""
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"""
         INSERT INTO reservations (nom_client, telephone_client, ville, quartier,
         type_service, sous_service, date_intervention, heure_debut, duree,
         contrat, logement, salaire)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES ({ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph})
     """, (
         data.get("nom_client"), data.get("telephone_client"),
         data.get("ville"), data.get("quartier"),
@@ -148,23 +152,32 @@ def chercher_artisans_page():
     ville = data.get("ville", "")
     quartier = data.get("quartier", "")
     specialite = data.get("specialite", "")
-    conn = sqlite3.connect("homeassist.db")
-    conn.row_factory = sqlite3.Row
+    conn = get_conn()
     cursor = conn.cursor()
+    ph = "%s" if is_pg() else "?"
     query = "SELECT * FROM artisans WHERE disponible = 1"
     params = []
     if ville:
-        query += " AND ville LIKE ?"
+        query += f" AND ville LIKE {ph}"
         params.append(f"%{ville}%")
     if specialite:
-        query += " AND specialite LIKE ?"
+        query += f" AND specialite LIKE {ph}"
         params.append(f"%{specialite}%")
     if quartier:
-        query += " AND quartier LIKE ?"
+        query += f" AND quartier LIKE {ph}"
         params.append(f"%{quartier}%")
     query += " ORDER BY id DESC LIMIT 10"
     cursor.execute(query, params)
-    artisans = [dict(a) for a in cursor.fetchall()]
+    rows = cursor.fetchall()
+    if is_pg():
+        cols = [desc[0] for desc in cursor.description]
+        artisans = [dict(zip(cols, row)) for row in rows]
+    else:
+        import sqlite3 as sq
+        conn2 = sq.connect("homeassist.db")
+        conn2.row_factory = sq.Row
+        artisans = [dict(a) for a in rows]
+        conn2.close()
     conn.close()
     return jsonify({"artisans": artisans})
 
@@ -174,22 +187,32 @@ def admin():
 
 @app.route("/admin/data")
 def admin_data():
-    conn = sqlite3.connect("homeassist.db")
-    conn.row_factory = sqlite3.Row
+    conn = get_conn()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM reservations ORDER BY id DESC")
-    reservations = [dict(r) for r in cursor.fetchall()]
+    rows = cursor.fetchall()
+    if is_pg():
+        cols = [desc[0] for desc in cursor.description]
+        reservations = [dict(zip(cols, row)) for row in rows]
+    else:
+        reservations = [dict(r) for r in rows]
     cursor.execute("SELECT * FROM artisans ORDER BY id DESC")
-    artisans = [dict(a) for a in cursor.fetchall()]
+    rows = cursor.fetchall()
+    if is_pg():
+        cols = [desc[0] for desc in cursor.description]
+        artisans_list = [dict(zip(cols, row)) for row in rows]
+    else:
+        artisans_list = [dict(a) for a in rows]
     conn.close()
-    return jsonify({"reservations": reservations, "artisans": artisans})
+    return jsonify({"reservations": reservations, "artisans": artisans_list})
 
 @app.route("/admin/statut_reservation", methods=["POST"])
 def statut_reservation():
     data = request.json
-    conn = sqlite3.connect("homeassist.db")
+    conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("UPDATE reservations SET statut = ? WHERE id = ?", (data.get("statut"), data.get("id")))
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"UPDATE reservations SET statut = {ph} WHERE id = {ph}", (data.get("statut"), data.get("id")))
     conn.commit()
     conn.close()
     return jsonify({"success": True})
@@ -197,9 +220,10 @@ def statut_reservation():
 @app.route("/admin/toggle_artisan", methods=["POST"])
 def toggle_artisan():
     data = request.json
-    conn = sqlite3.connect("homeassist.db")
+    conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("UPDATE artisans SET disponible = ? WHERE id = ?", (data.get("disponible"), data.get("id")))
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"UPDATE artisans SET disponible = {ph} WHERE id = {ph}", (data.get("disponible"), data.get("id")))
     conn.commit()
     conn.close()
     return jsonify({"success": True})
@@ -211,13 +235,14 @@ def auth():
 @app.route("/register", methods=["POST"])
 def register():
     data = request.json
-    conn = sqlite3.connect("homeassist.db")
+    conn = get_conn()
     cursor = conn.cursor()
+    ph = "%s" if is_pg() else "?"
     try:
         password_hash = generate_password_hash(data.get("password"))
-        cursor.execute("""
+        cursor.execute(f"""
             INSERT INTO users (prenom, nom, email, telephone, pays, ville, quartier, password_hash)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            VALUES ({ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph})
         """, (
             data.get("prenom"), data.get("nom"), data.get("email"),
             data.get("telephone"), data.get("pays"), data.get("ville"),
@@ -233,7 +258,7 @@ def register():
         }
         return jsonify({"success": True})
     except Exception as e:
-        if "UNIQUE" in str(e):
+        if "UNIQUE" in str(e) or "unique" in str(e):
             return jsonify({"success": False, "error": "Cet email est déjà utilisé"})
         return jsonify({"success": False, "error": str(e)})
     finally:
@@ -244,21 +269,27 @@ def login():
     data = request.json
     email = data.get("email")
     password = data.get("password")
-    conn = sqlite3.connect("homeassist.db")
-    conn.row_factory = sqlite3.Row
+    conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM users WHERE email = ? OR telephone = ?", (email, email))
-    user = cursor.fetchone()
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"SELECT * FROM users WHERE email = {ph} OR telephone = {ph}", (email, email))
+    row = cursor.fetchone()
     conn.close()
-    if user and check_password_hash(user["password_hash"], password):
-        session['user'] = {
-            'email': user["email"],
-            'prenom': user["prenom"],
-            'nom': user["nom"],
-            'ville': user["ville"],
-            'quartier': user["quartier"]
-        }
-        return jsonify({"success": True})
+    if row:
+        if is_pg():
+            cols = [desc[0] for desc in cursor.description]
+            user = dict(zip(cols, row))
+        else:
+            user = dict(row)
+        if check_password_hash(user["password_hash"], password):
+            session['user'] = {
+                'email': user["email"],
+                'prenom': user["prenom"],
+                'nom': user["nom"],
+                'ville': user["ville"],
+                'quartier': user["quartier"]
+            }
+            return jsonify({"success": True})
     return jsonify({"success": False, "error": "Email ou mot de passe incorrect"})
 
 @app.route("/logout")
@@ -274,5 +305,9 @@ def me():
     return jsonify({"user": None})
 
 if __name__ == "__main__":
+    from database import init_db, init_reservations, init_users
+    init_db()
+    init_reservations()
+    init_users()
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
