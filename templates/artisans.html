@@ -121,117 +121,102 @@
 const categories = [
     { id: "electricite", label: "Électricité", desc: "Installations & réparations", img: "/static/cat_electricite.jpg",
       subs: [
-        { label: "Installation électrique", img: "/static/cat_electricite.jpg", spec: "lectricien" },
-        { label: "Panne de courant", img: "/static/cat_electricite.jpg", spec: "lectricien" },
-        { label: "Disjoncteur", img: "/static/cat_electricite.jpg", spec: "lectricien" },
-        { label: "Éclairage & prises", img: "/static/cat_electricite.jpg", spec: "lectricien" },
+        { label: "Installation électrique", spec: "lectricien" },
+        { label: "Panne de courant", spec: "lectricien" },
+        { label: "Disjoncteur", spec: "lectricien" },
+        { label: "Éclairage & prises", spec: "lectricien" },
       ]
     },
     { id: "plomberie", label: "Plomberie", desc: "Fuites & installations", img: "/static/cat_plomberie.jpg",
       subs: [
-        { label: "Robinet & fuite", img: "/static/cat_plomberie.jpg", spec: "Plombier" },
-        { label: "WC & lavabo", img: "/static/cat_plomberie.jpg", spec: "Plombier" },
-        { label: "Pompe à eau", img: "/static/cat_plomberie.jpg", spec: "Plombier" },
-        { label: "Chauffe-eau", img: "/static/cat_plomberie.jpg", spec: "Plombier" },
+        { label: "Robinet & fuite", spec: "Plombier" },
+        { label: "WC & lavabo", spec: "Plombier" },
+        { label: "Pompe à eau", spec: "Plombier" },
+        { label: "Chauffe-eau", spec: "Plombier" },
       ]
     },
     { id: "froid", label: "Froid & Clim", desc: "Climatisation & réfrigération", img: "/static/cat_Froid.jpg",
       subs: [
-        { label: "Climatiseur", img: "/static/cat_Froid.jpg", spec: "Frigoriste" },
-        { label: "Réfrigérateur", img: "/static/cat_Froid.jpg", spec: "Frigoriste" },
-        { label: "Congélateur", img: "/static/cat_Froid.jpg", spec: "Frigoriste" },
-        { label: "Ventilateur", img: "/static/cat_Froid.jpg", spec: "Frigoriste" },
+        { label: "Climatiseur", spec: "Frigoriste" },
+        { label: "Réfrigérateur", spec: "Frigoriste" },
+        { label: "Congélateur", spec: "Frigoriste" },
+        { label: "Ventilateur", spec: "Frigoriste" },
       ]
     },
     { id: "gaz", label: "Gaz", desc: "Recharge & réparations", img: "/static/cat_gaz.jpg",
       subs: [
-        { label: "Recharge bouteille", img: "/static/cat_gaz.jpg", spec: "gaz" },
-        { label: "Fuite de gaz", img: "/static/cat_gaz.jpg", spec: "gaz" },
-        { label: "Réchaud & cuisinière", img: "/static/cat_gaz.jpg", spec: "gaz" },
-        { label: "Installation gaz", img: "/static/cat_gaz.jpg", spec: "gaz" },
+        { label: "Recharge bouteille", spec: "gaz" },
+        { label: "Fuite de gaz", spec: "gaz" },
+        { label: "Réchaud & cuisinière", spec: "gaz" },
+        { label: "Installation gaz", spec: "gaz" },
       ]
     },
     { id: "maconnerie", label: "Maçonnerie", desc: "Construction & rénovation", img: "/static/cat_ma%C3%A7onnerie.jpg",
       subs: [
-        { label: "Fissures & murs", img: "/static/cat_ma%C3%A7onnerie.jpg", spec: "Macon" },
-        { label: "Carrelage", img: "/static/cat_ma%C3%A7onnerie.jpg", spec: "Macon" },
-        { label: "Peinture", img: "/static/cat_ma%C3%A7onnerie.jpg", spec: "Macon" },
-        { label: "Toiture", img: "/static/cat_ma%C3%A7onnerie.jpg", spec: "Macon" },
+        { label: "Fissures & murs", spec: "Macon" },
+        { label: "Carrelage", spec: "Macon" },
+        { label: "Peinture", spec: "Macon" },
+        { label: "Toiture", spec: "Macon" },
       ]
     },
     { id: "menuiserie", label: "Menuiserie", desc: "Bois & mobilier", img: "/static/cat_menuiserie.jpg",
       subs: [
-        { label: "Porte & fenêtre", img: "/static/cat_menuiserie.jpg", spec: "Menuisier" },
-        { label: "Meuble sur mesure", img: "/static/cat_menuiserie.jpg", spec: "Menuisier" },
-        { label: "Vitrier", img: "/static/cat_menuiserie.jpg", spec: "Vitrier" },
-        { label: "Volet & store", img: "/static/cat_menuiserie.jpg", spec: "Menuisier" },
+        { label: "Porte & fenêtre", spec: "Menuisier" },
+        { label: "Meuble sur mesure", spec: "Menuisier" },
+        { label: "Vitrier", spec: "Vitrier" },
+        { label: "Volet & store", spec: "Menuisier" },
       ]
     },
     { id: "jardinage", label: "Jardinage", desc: "Entretien & espaces verts", img: "/static/cat_jadinage.jpg",
       subs: [
-        { label: "Taille & élagage", img: "/static/cat_jadinage.jpg", spec: "Jardinier" },
-        { label: "Pelouse & gazon", img: "/static/cat_jadinage.jpg", spec: "Jardinier" },
-        { label: "Plantes malades", img: "/static/cat_jadinage.jpg", spec: "Jardinier" },
-        { label: "Aménagement jardin", img: "/static/cat_jadinage.jpg", spec: "Jardinier" },
+        { label: "Taille & élagage", spec: "Jardinier" },
+        { label: "Pelouse & gazon", spec: "Jardinier" },
+        { label: "Plantes malades", spec: "Jardinier" },
+        { label: "Aménagement jardin", spec: "Jardinier" },
       ]
     },
     { id: "menage", label: "Ménage", desc: "Nettoyage & entretien", img: "/static/cat_menage_1.jpg",
       subs: [
-        { label: "Nettoyage complet", img: "/static/cat_menage_1.jpg", spec: "nage" },
-        { label: "Repassage", img: "/static/cat_menage_1.jpg", spec: "nage" },
-        { label: "Lessive", img: "/static/cat_menage_1.jpg", spec: "nage" },
-        { label: "Cuisine & rangement", img: "/static/cat_menage_1.jpg", spec: "nage" },
+        { label: "Nettoyage complet", spec: "nage" },
+        { label: "Repassage", spec: "nage" },
+        { label: "Lessive", spec: "nage" },
+        { label: "Cuisine & rangement", spec: "nage" },
       ]
     },
     { id: "courses", label: "Courses", desc: "Marché & commissions", img: "/static/cat_course.jpg",
       subs: [
-        { label: "Marché traditionnel", img: "/static/cat_course.jpg", spec: "Coursier" },
-        { label: "Supermarché", img: "/static/cat_course.jpg", spec: "Coursier" },
-        { label: "Pharmacie", img: "/static/cat_course.jpg", spec: "Coursier" },
-        { label: "Commissions diverses", img: "/static/cat_course.jpg", spec: "Coursier" },
+        { label: "Marché traditionnel", spec: "Coursier" },
+        { label: "Supermarché", spec: "Coursier" },
+        { label: "Pharmacie", spec: "Coursier" },
+        { label: "Commissions diverses", spec: "Coursier" },
       ]
     },
-    { id: "garde", label: "Garde d'enfants", desc: "Baby-sitting & accompagnement", img: "/static/cat_garde.jpg",
+    { id: "garde", label: "Garde d'enfants", desc: "Garde & accompagnement", img: "/static/cat_garde.jpg",
       subs: [
-        { label: "Baby-sitting", img: "/static/cat_garde.jpg", spec: "Garde" },
-        { label: "Accompagnement scolaire", img: "/static/cat_garde.jpg", spec: "Garde" },
-        { label: "Aide personnes âgées", img: "/static/cat_garde.jpg", spec: "Garde" },
-        { label: "Garde de nuit", img: "/static/cat_garde.jpg", spec: "Garde" },
+        { label: "Garde à domicile", spec: "Garde" },
+        { label: "Accompagnement scolaire", spec: "Garde" },
+        { label: "Aide personnes âgées", spec: "Garde" },
+        { label: "Garde de nuit", spec: "Garde" },
       ]
     },
-   { id: "employe", label: "Employé(e) de maison", desc: "Ménage + garde + cuisine", img: "/static/cat_employe.jpg",
-  subs: [
-    { label: "Ménage + garde enfants", img: "/static/cat_employe.jpg", spec: "maison" },
-    { label: "Ménage + cuisine", img: "/static/cat_employe.jpg", spec: "maison" },
-    { label: "Toutes tâches", img: "/static/cat_employe.jpg", spec: "maison" },
-    { label: "Ménage + courses", img: "/static/cat_employe.jpg", spec: "maison" },
-  ]
-},
+    { id: "employe", label: "Employé(e) de maison", desc: "Ménage + garde + cuisine", img: "/static/cat_employe.jpg",
+      subs: [
+        { label: "Ménage + garde enfants", spec: "maison" },
+        { label: "Ménage + cuisine", spec: "maison" },
+        { label: "Toutes tâches", spec: "maison" },
+        { label: "Ménage + courses", spec: "maison" },
+      ]
+    },
     { id: "demenagement", label: "Déménagement", desc: "Transport & manutention", img: "/static/cat_demenagement.jpg",
       subs: [
-        { label: "Déménagement complet", img: "/static/cat_demenagement.jpg", spec: "Déménagement" },
-        { label: "Transport de meubles", img: "/static/cat_demenagement.jpg", spec: "Déménagement" },
-        { label: "Manutention", img: "/static/cat_demenagement.jpg", spec: "Déménagement" },
-        { label: "Livraison", img: "/static/cat_demenagement.jpg", spec: "Déménagement" },
+        { label: "Déménagement complet", spec: "Déménagement" },
+        { label: "Transport de meubles", spec: "Déménagement" },
+        { label: "Manutention", spec: "Déménagement" },
+        { label: "Livraison", spec: "Déménagement" },
       ]
     },
 ];
 
-let currentCat = null;
-
-function buildCatGrid() {
-    const grid = document.getElementById("catGrid");
-    grid.innerHTML = categories.map(cat => `
-        <div class="cat-card" onclick="showSubs('${cat.id}')">
-            <img src="${cat.img}" alt="${cat.label}" loading="lazy">
-            <div class="overlay"></div>
-            <div class="cat-label">
-                <h3>${cat.label}</h3>
-                <p>${cat.desc}</p>
-            </div>
-        </div>
-    `).join("");
-}
 const SUB_IMAGES = {
     "Installation électrique": "https://images.unsplash.com/photo-1621905251189-08b1058e6c7a?w=400&q=80",
     "Panne de courant": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&q=80",
@@ -269,19 +254,35 @@ const SUB_IMAGES = {
     "Supermarché": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80",
     "Pharmacie": "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=400&q=80",
     "Commissions diverses": "https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=400&q=80",
-    "Baby-sitting": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&q=80",
+    "Garde à domicile": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&q=80",
     "Accompagnement scolaire": "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?w=400&q=80",
     "Aide personnes âgées": "https://images.unsplash.com/photo-1516307365426-bea591f05011?w=400&q=80",
     "Garde de nuit": "https://images.unsplash.com/photo-1520206183501-b80df61043c2?w=400&q=80",
     "Ménage + garde enfants": "https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&q=80",
     "Ménage + cuisine": "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80",
     "Toutes tâches": "https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80",
-    "Contrat long terme": "https://images.unsplash.com/photo-1450101499163-c8848c66ca85?w=400&q=80",
+    "Ménage + courses": "https://images.unsplash.com/photo-1542838132-92c53300491e?w=400&q=80",
     "Déménagement complet": "https://images.unsplash.com/photo-1600585152220-90363fe7e115?w=400&q=80",
     "Transport de meubles": "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&q=80",
     "Manutention": "https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400&q=80",
     "Livraison": "https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=400&q=80",
 };
+
+let currentCat = null;
+
+function buildCatGrid() {
+    const grid = document.getElementById("catGrid");
+    grid.innerHTML = categories.map(cat => `
+        <div class="cat-card" onclick="showSubs('${cat.id}')">
+            <img src="${cat.img}" alt="${cat.label}" loading="lazy">
+            <div class="overlay"></div>
+            <div class="cat-label">
+                <h3>${cat.label}</h3>
+                <p>${cat.desc}</p>
+            </div>
+        </div>
+    `).join("");
+}
 
 function showSubs(catId) {
     currentCat = categories.find(c => c.id === catId);
@@ -351,8 +352,6 @@ function afficherArtisans(artisans, label) {
             </div>
         </div>
     `).join("");
-
-    // Charger les notes de chaque artisan
     artisans.forEach(a => chargerNote(a.id));
 }
 
@@ -377,12 +376,12 @@ function ouvrirNotation(artisanId, nom) {
     modal.innerHTML = `
         <div style="background:#FDFAF5;border-radius:16px;padding:24px;width:90%;max-width:400px;border:0.5px solid #D4C4A8;">
             <h3 style="color:#5C4A32;margin-bottom:16px;">⭐ Noter ${nom}</h3>
-            <div style="display:flex;gap:8px;margin-bottom:16px;justify-content:center;" id="stars">
+            <div style="display:flex;gap:8px;margin-bottom:16px;justify-content:center;">
                 ${[1,2,3,4,5].map(i => `<span onclick="setNote(${i})" id="star-${i}" style="font-size:32px;cursor:pointer;opacity:0.3;">⭐</span>`).join('')}
             </div>
             <textarea id="avis-text" placeholder="Votre avis (optionnel)..." style="width:100%;padding:10px;border:0.5px solid #D4C4A8;border-radius:8px;font-size:13px;height:80px;resize:none;background:#F5F0E8;"></textarea>
             <div style="display:flex;gap:8px;margin-top:12px;">
-                <button onclick="this.closest('[style]').remove()" style="flex:1;padding:10px;background:#E8DCC8;border:none;border-radius:8px;cursor:pointer;color:#5C4A32;">Annuler</button>
+                <button onclick="this.closest('div[style]').remove()" style="flex:1;padding:10px;background:#E8DCC8;border:none;border-radius:8px;cursor:pointer;color:#5C4A32;">Annuler</button>
                 <button onclick="envoyerNote(${artisanId})" style="flex:1;padding:10px;background:#5C4A32;border:none;border-radius:8px;cursor:pointer;color:white;">Envoyer ⭐</button>
             </div>
         </div>
@@ -410,7 +409,7 @@ async function envoyerNote(artisanId) {
         });
         const data = await res.json();
         if (data.success) {
-            document.querySelector('[style*="position:fixed"]').remove();
+            document.querySelector('div[style*="position:fixed"]').remove();
             chargerNote(artisanId);
             alert('✅ Merci pour votre avis !');
         } else {
@@ -419,27 +418,6 @@ async function envoyerNote(artisanId) {
     } catch(e) {
         alert('❌ Erreur de connexion');
     }
-}
-    grid.innerHTML = artisans.map(a => `
-        <div class="artisan-card">
-            <div class="artisan-header">
-                <div class="artisan-avatar">🔧</div>
-                <div>
-                    <div class="artisan-name">${a.nom} ${a.prenom}</div>
-                    <div class="artisan-spec">${a.specialite}</div>
-                </div>
-            </div>
-            <div class="artisan-info">
-                <span class="badge">📍 ${a.ville}${a.quartier ? ' — ' + a.quartier : ''}</span>
-                <span class="badge green">✅ Disponible</span>
-                ${a.experience ? `<span class="badge">⏱️ ${a.experience}</span>` : ''}
-            </div>
-            <div class="artisan-actions">
-                <a href="tel:${a.telephone}" class="btn-call">📞 Appeler</a>
-                <a href="/reservation" class="btn-reserve">📅 Réserver</a>
-            </div>
-        </div>
-    `).join("");
 }
 
 async function searchArtisans(query) {
