@@ -263,7 +263,6 @@ def register():
         return jsonify({"success": False, "error": str(e)})
     finally:
         conn.close()
-
 @app.route("/login", methods=["POST"])
 def login():
     data = request.json
@@ -272,15 +271,12 @@ def login():
     conn = get_conn()
     cursor = conn.cursor()
     ph = "%s" if is_pg() else "?"
-    cursor.execute(f"SELECT * FROM users WHERE email = {ph} OR telephone = {ph}", (email, email))
+    cursor.execute(f"SELECT id, prenom, nom, email, telephone, ville, quartier, password_hash FROM users WHERE email = {ph} OR telephone = {ph}", (email, email))
+    cols = [desc[0] for desc in cursor.description]
     row = cursor.fetchone()
     conn.close()
     if row:
-        if is_pg():
-            cols = [desc[0] for desc in cursor.description]
-            user = dict(zip(cols, row))
-        else:
-            user = dict(row)
+        user = dict(zip(cols, row))
         if check_password_hash(user["password_hash"], password):
             session['user'] = {
                 'email': user["email"],
@@ -291,7 +287,6 @@ def login():
             }
             return jsonify({"success": True})
     return jsonify({"success": False, "error": "Email ou mot de passe incorrect"})
-
 @app.route("/logout")
 def logout():
     session.clear()
