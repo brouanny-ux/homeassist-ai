@@ -136,7 +136,37 @@ def init_users():
     conn.close()
     print("Table users OK !")
 
+def init_ratings():
+    conn = get_conn()
+    cursor = conn.cursor()
+    if is_pg():
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS ratings (
+                id SERIAL PRIMARY KEY,
+                artisan_id INTEGER NOT NULL,
+                user_email TEXT NOT NULL,
+                note INTEGER NOT NULL CHECK(note >= 1 AND note <= 5),
+                avis TEXT,
+                date_notation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+    else:
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS ratings (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                artisan_id INTEGER NOT NULL,
+                user_email TEXT NOT NULL,
+                note INTEGER NOT NULL CHECK(note >= 1 AND note <= 5),
+                avis TEXT,
+                date_notation TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        """)
+    conn.commit()
+    conn.close()
+    print("Table ratings OK !")
+
 if __name__ == "__main__":
     init_db()
     init_reservations()
     init_users()
+    init_ratings()

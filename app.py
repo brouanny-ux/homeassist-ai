@@ -299,6 +299,50 @@ def me():
         return jsonify({"user": user})
     return jsonify({"user": None})
 
+@app.route("/noter_artisan", methods=["POST"])
+def noter_artisan():
+    data = request.json
+    user = session.get('user')
+    if not user:
+        return jsonify({"success": False, "error": "Connectez-vous pour noter"})
+    conn = get_conn()
+    cursor = conn.cursor()
+    ph = "%s" if is_pg() else "?"
+    try:
+        cursor.execute(f"""
+            INSERT INTO ratings (artisan_id, user_email, note, avis)
+            VALUES ({ph}, {ph}, {ph}, {ph})
+        """, (
+            data.get("artisan_id"),
+            user.get("email"),
+            data.get("note"),
+            data.get("avis", "")
+        ))
+        conn.commit()
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)})
+    finally:
+        conn.close()
+
+@app.route("/note_artisan/<int:artisan_id>")
+def note_artisan(artisan_id):
+    conn = get_conn()
+    cursor = conn.cursor()
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"""
+        SELECT COUNT(note) as total, AVG(note) as moyenne
+        FROM ratings WHERE artisan_id = {ph}
+    """, (artisan_id,))
+    row = cursor.fetchone()
+    conn.close()
+    if row and row[0] > 0:
+        return jsonify({
+            "total": row[0],
+            "moyenne": round(float(row[1]), 1)
+        })
+    return jsonify({"total": 0, "moyenne": 0})
+
 if __name__ == "__main__":
     from database import init_db, init_reservations, init_users
     init_db()

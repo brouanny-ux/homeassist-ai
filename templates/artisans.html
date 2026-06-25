@@ -334,6 +334,100 @@ function afficherArtisans(artisans, label) {
                     <div class="artisan-name">${a.nom} ${a.prenom}</div>
                     <div class="artisan-spec">${a.specialite}</div>
                 </div>
+                <div id="note-${a.id}" style="margin-left:auto;text-align:right;">
+                    <div style="color:#F59E0B;font-size:16px;">⭐ --</div>
+                    <div style="font-size:10px;color:#8B6F47;">Chargement...</div>
+                </div>
+            </div>
+            <div class="artisan-info">
+                <span class="badge">📍 ${a.ville}${a.quartier ? ' — ' + a.quartier : ''}</span>
+                <span class="badge green">✅ Disponible</span>
+                ${a.experience ? `<span class="badge">⏱️ ${a.experience}</span>` : ''}
+            </div>
+            <div class="artisan-actions">
+                <a href="tel:${a.telephone}" class="btn-call">📞 Appeler</a>
+                <a href="/reservation" class="btn-reserve">📅 Réserver</a>
+                <button onclick="ouvrirNotation(${a.id}, '${a.nom} ${a.prenom}')" style="padding:9px 12px;background:#E8DCC8;border:0.5px solid #8B6F47;border-radius:8px;font-size:13px;cursor:pointer;color:#5C4A32;">⭐ Noter</button>
+            </div>
+        </div>
+    `).join("");
+
+    // Charger les notes de chaque artisan
+    artisans.forEach(a => chargerNote(a.id));
+}
+
+async function chargerNote(artisanId) {
+    try {
+        const res = await fetch(`/note_artisan/${artisanId}`);
+        const data = await res.json();
+        const el = document.getElementById(`note-${artisanId}`);
+        if (el) {
+            if (data.total > 0) {
+                el.innerHTML = `<div style="color:#F59E0B;font-size:16px;">⭐ ${data.moyenne}/5</div><div style="font-size:10px;color:#8B6F47;">${data.total} avis</div>`;
+            } else {
+                el.innerHTML = `<div style="color:#C4A882;font-size:13px;">Nouveau</div>`;
+            }
+        }
+    } catch(e) {}
+}
+
+function ouvrirNotation(artisanId, nom) {
+    const modal = document.createElement('div');
+    modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    modal.innerHTML = `
+        <div style="background:#FDFAF5;border-radius:16px;padding:24px;width:90%;max-width:400px;border:0.5px solid #D4C4A8;">
+            <h3 style="color:#5C4A32;margin-bottom:16px;">⭐ Noter ${nom}</h3>
+            <div style="display:flex;gap:8px;margin-bottom:16px;justify-content:center;" id="stars">
+                ${[1,2,3,4,5].map(i => `<span onclick="setNote(${i})" id="star-${i}" style="font-size:32px;cursor:pointer;opacity:0.3;">⭐</span>`).join('')}
+            </div>
+            <textarea id="avis-text" placeholder="Votre avis (optionnel)..." style="width:100%;padding:10px;border:0.5px solid #D4C4A8;border-radius:8px;font-size:13px;height:80px;resize:none;background:#F5F0E8;"></textarea>
+            <div style="display:flex;gap:8px;margin-top:12px;">
+                <button onclick="this.closest('[style]').remove()" style="flex:1;padding:10px;background:#E8DCC8;border:none;border-radius:8px;cursor:pointer;color:#5C4A32;">Annuler</button>
+                <button onclick="envoyerNote(${artisanId})" style="flex:1;padding:10px;background:#5C4A32;border:none;border-radius:8px;cursor:pointer;color:white;">Envoyer ⭐</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    window._noteSelectionnee = 0;
+}
+
+function setNote(n) {
+    window._noteSelectionnee = n;
+    for(let i=1;i<=5;i++) {
+        document.getElementById(`star-${i}`).style.opacity = i <= n ? '1' : '0.3';
+    }
+}
+
+async function envoyerNote(artisanId) {
+    const note = window._noteSelectionnee;
+    if (!note) { alert('Veuillez choisir une note !'); return; }
+    const avis = document.getElementById('avis-text').value;
+    try {
+        const res = await fetch('/noter_artisan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ artisan_id: artisanId, note, avis })
+        });
+        const data = await res.json();
+        if (data.success) {
+            document.querySelector('[style*="position:fixed"]').remove();
+            chargerNote(artisanId);
+            alert('✅ Merci pour votre avis !');
+        } else {
+            alert('⚠️ ' + (data.error || 'Erreur'));
+        }
+    } catch(e) {
+        alert('❌ Erreur de connexion');
+    }
+}
+    grid.innerHTML = artisans.map(a => `
+        <div class="artisan-card">
+            <div class="artisan-header">
+                <div class="artisan-avatar">🔧</div>
+                <div>
+                    <div class="artisan-name">${a.nom} ${a.prenom}</div>
+                    <div class="artisan-spec">${a.specialite}</div>
+                </div>
             </div>
             <div class="artisan-info">
                 <span class="badge">📍 ${a.ville}${a.quartier ? ' — ' + a.quartier : ''}</span>
