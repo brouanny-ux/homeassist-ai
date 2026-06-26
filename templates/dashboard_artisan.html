@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HomeAssist AI — Espace Artisan</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #F5F0E8; min-height: 100vh; }
+        .header { background: #3A5C30; padding: 12px 20px; display: flex; align-items: center; gap: 12px; }
+        .logo { width: 38px; height: 38px; background: #6B8F5E; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; text-decoration: none; transition: all .2s; }
+        .logo:hover { background: #5C4A32; transform: scale(1.1); }
+        .header-info h1 { font-size: 16px; font-weight: 500; color: #FDFAF5; }
+        .header-info p { font-size: 12px; color: #9FE1CB; }
+        .header-nav { margin-left: auto; display: flex; gap: 4px; align-items: center; }
+        .header-nav a { font-size: 12px; color: #9FE1CB; padding: 6px 12px; border-radius: 8px; text-decoration: none; transition: background .15s; }
+        .header-nav a:hover { background: #6B8F5E; color: #FDFAF5; }
+        .artisan-badge { background: #6B8F5E; padding: 6px 14px; border-radius: 20px; font-size: 12px; color: #FDFAF5; }
+
+        .hero { background: linear-gradient(135deg, #3A5C30, #6B8F5E); padding: 40px 20px; }
+        .hero-content { max-width: 1100px; margin: 0 auto; display: flex; align-items: center; gap: 20px; }
+        .hero-avatar { width: 70px; height: 70px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; }
+        .hero-text h2 { color: #FDFAF5; font-size: 24px; font-weight: 500; margin-bottom: 4px; }
+        .hero-text p { color: #9FE1CB; font-size: 14px; }
+        .hero-rating { margin-left: auto; text-align: center; background: rgba(255,255,255,0.15); padding: 16px 24px; border-radius: 12px; }
+        .hero-rating .stars { font-size: 24px; color: #FCD34D; }
+        .hero-rating .score { font-size: 28px; font-weight: 500; color: white; }
+        .hero-rating .label { font-size: 11px; color: #9FE1CB; }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 30px 20px; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 30px; }
+        .stat-card { background: white; border-radius: 12px; padding: 20px; border: 0.5px solid #D4C4A8; text-align: center; }
+        .stat-card .icon { font-size: 28px; margin-bottom: 8px; }
+        .stat-card .number { font-size: 28px; font-weight: 500; color: #3A5C30; }
+        .stat-card .label { font-size: 12px; color: #6B8F5E; margin-top: 4px; }
+
+        .grid-2 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 30px; }
+        .section-card { background: white; border-radius: 12px; padding: 20px; border: 0.5px solid #D4C4A8; }
+        .section-card h3 { font-size: 16px; font-weight: 500; color: #3A5C30; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 0.5px solid #EDE4D4; }
+
+        .avis-item { padding: 12px 0; border-bottom: 0.5px solid #EDE4D4; }
+        .avis-item:last-child { border-bottom: none; }
+        .avis-stars { color: #F59E0B; font-size: 14px; margin-bottom: 4px; }
+        .avis-text { font-size: 13px; color: #3A2E22; font-style: italic; }
+        .avis-date { font-size: 11px; color: #8B6F47; margin-top: 4px; }
+
+        .dispo-toggle { display: flex; align-items: center; justify-content: space-between; padding: 14px; background: #E8F0E4; border-radius: 10px; margin-bottom: 16px; }
+        .dispo-toggle span { font-size: 14px; font-weight: 500; color: #3A5C30; }
+        .toggle-btn { padding: 8px 20px; border: none; border-radius: 20px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all .2s; }
+        .toggle-on { background: #3A5C30; color: white; }
+        .toggle-off { background: #D4C4A8; color: #5C4A32; }
+
+        .action-btn { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #F5F0E8; border-radius: 10px; text-decoration: none; color: #3A5C30; font-size: 13px; margin-bottom: 10px; border: 0.5px solid #D4C4A8; transition: all .2s; }
+        .action-btn:hover { background: #E8F0E4; border-color: #6B8F5E; }
+        .action-btn .icon { font-size: 20px; }
+
+        .empty-state { text-align: center; padding: 30px; color: #8B6F47; }
+        .btn-primary { display: inline-block; padding: 10px 20px; background: #3A5C30; color: white; border-radius: 8px; text-decoration: none; font-size: 13px; margin-top: 10px; }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            .grid-2 { grid-template-columns: 1fr; }
+            .hero-rating { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <a href="/" class="logo">🔧</a>
+    <div class="header-info">
+        <h1>HomeAssist AI — Espace Artisan</h1>
+        <p>Gérez vos missions et votre profil</p>
+    </div>
+    <nav class="header-nav">
+        <a href="/">🏠 Accueil</a>
+        <a href="/artisans">🔍 Annuaire</a>
+        <span class="artisan-badge" id="artisan-name">🔧 Chargement...</span>
+        <a href="/logout" style="color:#FAC775;">Déconnexion</a>
+    </nav>
+</div>
+
+<div class="hero">
+    <div class="hero-content">
+        <div class="hero-avatar">🔧</div>
+        <div class="hero-text">
+            <h2 id="welcome-name">Bonjour !</h2>
+            <p id="welcome-spec">Votre espace prestataire</p>
+        </div>
+        <div class="hero-rating">
+            <div class="stars" id="hero-stars">⭐⭐⭐⭐⭐</div>
+            <div class="score" id="hero-score">--</div>
+            <div class="label" id="hero-avis">Aucun avis</div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="icon">📋</div>
+            <div class="number" id="nb-missions">0</div>
+            <div class="label">Missions reçues</div>
+        </div>
+        <div class="stat-card">
+            <div class="icon">✅</div>
+            <div class="number" id="nb-terminees">0</div>
+            <div class="label">Missions terminées</div>
+        </div>
+        <div class="stat-card">
+            <div class="icon">⭐</div>
+            <div class="number" id="nb-note">--</div>
+            <div class="label">Note moyenne</div>
+        </div>
+        <div class="stat-card">
+            <div class="icon">💬</div>
+            <div class="number" id="nb-avis">0</div>
+            <div class="label">Avis reçus</div>
+        </div>
+    </div>
+
+    <div class="grid-2">
+        <div class="section-card">
+            <h3>💬 Avis reçus</h3>
+            <div id="avis-list">
+                <div class="empty-state">
+                    <div style="font-size:40px;margin-bottom:10px;">⭐</div>
+                    <p>Aucun avis reçu pour le moment</p>
+                    <p style="font-size:12px;margin-top:8px;">Les avis apparaîtront ici après vos premières missions</p>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-card" style="margin-bottom:20px;">
+                <h3>🟢 Ma disponibilité</h3>
+                <div class="dispo-toggle">
+                    <span id="dispo-label">🟢 Disponible</span>
+                    <button class="toggle-btn toggle-on" id="dispo-btn" onclick="toggleDispo()">Actif</button>
+                </div>
+                <p style="font-size:12px;color:#8B6F47;">Activez ou désactivez votre disponibilité pour recevoir des demandes.</p>
+            </div>
+
+            <div class="section-card">
+                <h3>⚡ Actions rapides</h3>
+                <a href="/inscription" class="action-btn"><span class="icon">✏️</span> Modifier mon profil</a>
+                <a href="/artisans" class="action-btn"><span class="icon">🔍</span> Voir l'annuaire</a>
+                <a href="/" class="action-btn"><span class="icon">🏠</span> Accueil</a>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+let artisanId = null;
+let isDispo = true;
+
+async function loadDashboard() {
+    try {
+        const res = await fetch('/me');
+        const data = await res.json();
+        if (!data.user) { window.location.href = '/auth'; return; }
+
+        const user = data.user;
+        document.getElementById('artisan-name').textContent = '🔧 ' + user.prenom;
+        document.getElementById('welcome-name').textContent = 'Bonjour ' + user.prenom + ' ' + (user.nom || '') + ' !';
+
+        // Charger le profil artisan
+        const artRes = await fetch('/mon_profil_artisan');
+        const artData = await artRes.json();
+
+        if (artData.artisan) {
+            const a = artData.artisan;
+            artisanId = a.id;
+            isDispo = a.disponible == 1;
+            document.getElementById('welcome-spec').textContent = '🔧 ' + a.specialite + ' — 📍 ' + a.ville + (a.quartier ? ' — ' + a.quartier : '');
+            updateDispoUI();
+
+            // Charger les notes
+            const noteRes = await fetch(`/note_artisan/${a.id}`);
+            const noteData = await noteRes.json();
+            if (noteData.total > 0) {
+                document.getElementById('nb-note').textContent = noteData.moyenne + '/5';
+                document.getElementById('nb-avis').textContent = noteData.total;
+                document.getElementById('hero-score').textContent = noteData.moyenne + '/5';
+                document.getElementById('hero-avis').textContent = noteData.total + ' avis';
+
+                // Charger les avis détaillés
+                const avisRes = await fetch(`/avis_artisan/${a.id}`);
+                const avisData = await avisRes.json();
+                if (avisData.avis && avisData.avis.length > 0) {
+                    document.getElementById('avis-list').innerHTML = avisData.avis.map(av => `
+                        <div class="avis-item">
+                            <div class="avis-stars">${'⭐'.repeat(av.note)}</div>
+                            <div class="avis-text">"${av.avis || 'Aucun commentaire'}"</div>
+                            <div class="avis-date">${new Date(av.date_notation).toLocaleDateString('fr-FR')}</div>
+                        </div>
+                    `).join('');
+                }
+            }
+        } else {
+            document.getElementById('welcome-spec').textContent = '⚠️ Profil artisan non trouvé — Inscrivez-vous dans l\'annuaire';
+        }
+    } catch(e) { console.error(e); }
+}
+
+function updateDispoUI() {
+    const btn = document.getElementById('dispo-btn');
+    const label = document.getElementById('dispo-label');
+    if (isDispo) {
+        btn.textContent = 'Actif';
+        btn.className = 'toggle-btn toggle-on';
+        label.textContent = '🟢 Disponible';
+    } else {
+        btn.textContent = 'Inactif';
+        btn.className = 'toggle-btn toggle-off';
+        label.textContent = '🔴 Indisponible';
+    }
+}
+
+async function toggleDispo() {
+    if (!artisanId) return;
+    isDispo = !isDispo;
+    updateDispoUI();
+    await fetch('/admin/toggle_artisan', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: artisanId, disponible: isDispo ? 1 : 0 })
+    });
+}
+
+loadDashboard();
+</script>
+</body>
+</html>

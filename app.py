@@ -113,7 +113,8 @@ def inscrire():
     ))
     conn.commit()
     conn.close()
-    return jsonify({"success": True})
+    role = data.get("role", "user")
+return jsonify({"success": True, "role": "role, "redirect": "/dashboard/artisan" if role == "artisan" else "/dashboard/user"})
 
 @app.route("/reservation")
 def reservation():
@@ -241,13 +242,13 @@ def register():
     try:
         password_hash = generate_password_hash(data.get("password"))
         cursor.execute(f"""
-            INSERT INTO users (prenom, nom, email, telephone, pays, ville, quartier, password_hash)
-            VALUES ({ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph})
-        """, (
-            data.get("prenom"), data.get("nom"), data.get("email"),
-            data.get("telephone"), data.get("pays"), data.get("ville"),
-            data.get("quartier"), password_hash
-        ))
+    INSERT INTO users (prenom, nom, email, telephone, pays, ville, quartier, password_hash, role)
+    VALUES ({ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph})
+""", (
+    data.get("prenom"), data.get("nom"), data.get("email"),
+    data.get("telephone"), data.get("pays"), data.get("ville"),
+    data.get("quartier"), password_hash, data.get("role", "user")
+))
         conn.commit()
         session['user'] = {
             'email': data.get("email"),
@@ -256,6 +257,7 @@ def register():
             'ville': data.get("ville"),
             'quartier': data.get("quartier")
         }
+        
         return jsonify({"success": True})
     except Exception as e:
         if "UNIQUE" in str(e) or "unique" in str(e):
@@ -265,6 +267,8 @@ def register():
         conn.close()
 @app.route("/login", methods=["POST"])
 def login():
+    role = data.get("role", "user")
+return jsonify({"success": True, "role": role, "redirect": "/dashboard/artisan" if role == "artisan" else "/dashboard/user"})
     data = request.json
     email = data.get("email")
     password = data.get("password")
@@ -285,7 +289,8 @@ def login():
                 'ville': user["ville"],
                 'quartier': user["quartier"]
             }
-            return jsonify({"success": True})
+            role = data.get("role", "user")
+return jsonify({"success": True, "role": role, "redirect": "/dashboard/artisan" if role == "artisan" else "/dashboard/user"})
     return jsonify({"success": False, "error": "Email ou mot de passe incorrect"})
 @app.route("/logout")
 def logout():
@@ -319,7 +324,8 @@ def noter_artisan():
             data.get("avis", "")
         ))
         conn.commit()
-        return jsonify({"success": True})
+        role = data.get("role", "user")
+return jsonify({"success": True, "role": role, "redirect": "/dashboard/artisan" if role == "artisan" else "/dashboard/user"})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
     finally:
@@ -342,6 +348,71 @@ def note_artisan(artisan_id):
             "moyenne": round(float(row[1]), 1)
         })
     return jsonify({"total": 0, "moyenne": 0})
+    @app.route("/dashboard/user")
+def dashboard_user():
+    if not session.get('user'):
+        return redirect("/auth")
+    return render_template("dashboard_user.html")
+
+@app.route("/dashboard/artisan")
+def dashboard_artisan():
+    if not session.get('user'):
+        return redirect("/auth")
+    return render_template("dashboard_artisan.html")
+
+@app.route("/mes_reservations")
+def mes_reservations():
+    user = session.get('user')
+    if not user:
+        return jsonify({"reservations": []})
+    conn = get_conn()
+    cursor = conn.cursor()
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"""
+        SELECT * FROM reservations 
+        WHERE nom_client LIKE {ph} OR telephone_client LIKE {ph}
+        ORDER BY id DESC LIMIT 10
+    """, (f"%{user.get('prenom')}%", f"%{user.get('email')}%"))
+    cols = [desc[0] for desc in cursor.description]
+    rows = cursor.fetchall()
+    conn.close()
+    reservations = [dict(zip(cols, row)) for row in rows]
+    return jsonify({"reservations": reservations})
+
+@app.route("/mon_profil_artisan")
+def mon_profil_artisan():
+    user = session.get('user')
+    if not user:
+        return jsonify({"artisan": None})
+    conn = get_conn()
+    cursor = conn.cursor()
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"""
+        SELECT * FROM artisans 
+        WHERE email = {ph} OR nom LIKE {ph}
+        LIMIT 1
+    """, (user.get('email'), f"%{user.get('nom')}%"))
+    cols = [desc[0] for desc in cursor.description]
+    row = cursor.fetchone()
+    conn.close()
+    if row:
+        return jsonify({"artisan": dict(zip(cols, row))})
+    return jsonify({"artisan": None})
+
+@app.route("/avis_artisan/<int:artisan_id>")
+def avis_artisan(artisan_id):
+    conn = get_conn()
+    cursor = conn.cursor()
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"""
+        SELECT note, avis, date_notation 
+        FROM ratings WHERE artisan_id = {ph}
+        ORDER BY date_notation DESC LIMIT 10
+    """, (artisan_id,))
+    cols = [desc[0] for desc in cursor.description]
+    rows = cursor.fetchall()
+    conn.close()
+    return jsonify({"avis": [dict(zip(cols, row)) for row in rows]})
 
 if __name__ == "__main__":
     from database import init_db, init_reservations, init_users

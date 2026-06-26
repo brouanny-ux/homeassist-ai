@@ -109,6 +109,7 @@ def init_users():
                 prenom TEXT NOT NULL,
                 nom TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
+                role TEXT DEFAULT 'user',
                 telephone TEXT NOT NULL,
                 pays TEXT,
                 ville TEXT NOT NULL,
