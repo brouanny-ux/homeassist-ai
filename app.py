@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_conn, is_pg
 import os
-import sqlite3
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -113,8 +112,7 @@ def inscrire():
     ))
     conn.commit()
     conn.close()
-    role = data.get("role", "user")
-return jsonify({"success": True, "role": "role, "redirect": "/dashboard/artisan" if role == "artisan" else "/dashboard/user"})
+    return jsonify({"success": True})
 
 @app.route("/reservation")
 def reservation():
@@ -172,18 +170,18 @@ def chercher_artisans_page():
     rows = cursor.fetchall()
     if is_pg():
         cols = [desc[0] for desc in cursor.description]
-        artisans = [dict(zip(cols, row)) for row in rows]
+        artisans_list = [dict(zip(cols, row)) for row in rows]
     else:
-        import sqlite3 as sq
-        conn2 = sq.connect("homeassist.db")
-        conn2.row_factory = sq.Row
-        artisans = [dict(a) for a in rows]
-        conn2.close()
+        cols = [desc[0] for desc in cursor.description]
+        artisans_list = [dict(zip(cols, row)) for row in rows]
     conn.close()
-    return jsonify({"artisans": artisans})
+    return jsonify({"artisans": artisans_list})
 
-@app.route("/admin")
+@app.route("/admin-homeassist-2026")
 def admin():
+    user = session.get('user')
+    if not user or user.get('role') != 'admin':
+        return redirect("/")
     return render_template("admin.html")
 
 @app.route("/admin/data")
@@ -191,19 +189,13 @@ def admin_data():
     conn = get_conn()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM reservations ORDER BY id DESC")
+    cols = [desc[0] for desc in cursor.description]
     rows = cursor.fetchall()
-    if is_pg():
-        cols = [desc[0] for desc in cursor.description]
-        reservations = [dict(zip(cols, row)) for row in rows]
-    else:
-        reservations = [dict(r) for r in rows]
+    reservations = [dict(zip(cols, row)) for row in rows]
     cursor.execute("SELECT * FROM artisans ORDER BY id DESC")
+    cols = [desc[0] for desc in cursor.description]
     rows = cursor.fetchall()
-    if is_pg():
-        cols = [desc[0] for desc in cursor.description]
-        artisans_list = [dict(zip(cols, row)) for row in rows]
-    else:
-        artisans_list = [dict(a) for a in rows]
+    artisans_list = [dict(zip(cols, row)) for row in rows]
     conn.close()
     return jsonify({"reservations": reservations, "artisans": artisans_list})
 
@@ -242,56 +234,61 @@ def register():
     try:
         password_hash = generate_password_hash(data.get("password"))
         cursor.execute(f"""
-    INSERT INTO users (prenom, nom, email, telephone, pays, ville, quartier, password_hash, role)
-    VALUES ({ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph})
-""", (
-    data.get("prenom"), data.get("nom"), data.get("email"),
-    data.get("telephone"), data.get("pays"), data.get("ville"),
-    data.get("quartier"), password_hash, data.get("role", "user")
-))
+            INSERT INTO users (prenom, nom, email, telephone, pays, ville, quartier, password_hash, role)
+            VALUES ({ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph})
+        """, (
+            data.get("prenom"), data.get("nom"), data.get("email"),
+            data.get("telephone"), data.get("pays"), data.get("ville"),
+            data.get("quartier"), password_hash, data.get("role", "user")
+        ))
         conn.commit()
+        role = data.get("role", "user")
         session['user'] = {
             'email': data.get("email"),
             'prenom': data.get("prenom"),
             'nom': data.get("nom"),
             'ville': data.get("ville"),
-            'quartier': data.get("quartier")
+            'quartier': data.get("quartier"),
+            'role': role
         }
-        
-        return jsonify({"success": True})
+        return jsonify({"success": True, "role": role, "redirect": "/dashboard/artisan" if role == "artisan" else "/dashboard/user"})
     except Exception as e:
         if "UNIQUE" in str(e) or "unique" in str(e):
             return jsonify({"success": False, "error": "Cet email est déjà utilisé"})
         return jsonify({"success": False, "error": str(e)})
     finally:
         conn.close()
+
 @app.route("/login", methods=["POST"])
 def login():
-    role = data.get("role", "user")
-return jsonify({"success": True, "role": role, "redirect": "/dashboard/artisan" if role == "artisan" else "/dashboard/user"})
     data = request.json
     email = data.get("email")
     password = data.get("password")
     conn = get_conn()
     cursor = conn.cursor()
     ph = "%s" if is_pg() else "?"
-    cursor.execute(f"SELECT id, prenom, nom, email, telephone, ville, quartier, password_hash FROM users WHERE email = {ph} OR telephone = {ph}", (email, email))
+    cursor.execute(f"""
+        SELECT id, prenom, nom, email, telephone, ville, quartier, password_hash, role
+        FROM users WHERE email = {ph} OR telephone = {ph}
+    """, (email, email))
     cols = [desc[0] for desc in cursor.description]
     row = cursor.fetchone()
     conn.close()
     if row:
         user = dict(zip(cols, row))
         if check_password_hash(user["password_hash"], password):
+            role = user.get("role", "user")
             session['user'] = {
                 'email': user["email"],
                 'prenom': user["prenom"],
                 'nom': user["nom"],
                 'ville': user["ville"],
-                'quartier': user["quartier"]
+                'quartier': user["quartier"],
+                'role': role
             }
-            role = data.get("role", "user")
-return jsonify({"success": True, "role": role, "redirect": "/dashboard/artisan" if role == "artisan" else "/dashboard/user"})
+            return jsonify({"success": True, "role": role, "redirect": "/dashboard/artisan" if role == "artisan" else "/dashboard/user"})
     return jsonify({"success": False, "error": "Email ou mot de passe incorrect"})
+
 @app.route("/logout")
 def logout():
     session.clear()
@@ -324,8 +321,7 @@ def noter_artisan():
             data.get("avis", "")
         ))
         conn.commit()
-        role = data.get("role", "user")
-return jsonify({"success": True, "role": role, "redirect": "/dashboard/artisan" if role == "artisan" else "/dashboard/user"})
+        return jsonify({"success": True})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)})
     finally:
@@ -343,12 +339,10 @@ def note_artisan(artisan_id):
     row = cursor.fetchone()
     conn.close()
     if row and row[0] > 0:
-        return jsonify({
-            "total": row[0],
-            "moyenne": round(float(row[1]), 1)
-        })
+        return jsonify({"total": row[0], "moyenne": round(float(row[1]), 1)})
     return jsonify({"total": 0, "moyenne": 0})
-    @app.route("/dashboard/user")
+
+@app.route("/dashboard/user")
 def dashboard_user():
     if not session.get('user'):
         return redirect("/auth")
@@ -369,15 +363,14 @@ def mes_reservations():
     cursor = conn.cursor()
     ph = "%s" if is_pg() else "?"
     cursor.execute(f"""
-        SELECT * FROM reservations 
+        SELECT * FROM reservations
         WHERE nom_client LIKE {ph} OR telephone_client LIKE {ph}
         ORDER BY id DESC LIMIT 10
     """, (f"%{user.get('prenom')}%", f"%{user.get('email')}%"))
     cols = [desc[0] for desc in cursor.description]
     rows = cursor.fetchall()
     conn.close()
-    reservations = [dict(zip(cols, row)) for row in rows]
-    return jsonify({"reservations": reservations})
+    return jsonify({"reservations": [dict(zip(cols, row)) for row in rows]})
 
 @app.route("/mon_profil_artisan")
 def mon_profil_artisan():
@@ -388,7 +381,7 @@ def mon_profil_artisan():
     cursor = conn.cursor()
     ph = "%s" if is_pg() else "?"
     cursor.execute(f"""
-        SELECT * FROM artisans 
+        SELECT * FROM artisans
         WHERE email = {ph} OR nom LIKE {ph}
         LIMIT 1
     """, (user.get('email'), f"%{user.get('nom')}%"))
@@ -405,7 +398,7 @@ def avis_artisan(artisan_id):
     cursor = conn.cursor()
     ph = "%s" if is_pg() else "?"
     cursor.execute(f"""
-        SELECT note, avis, date_notation 
+        SELECT note, avis, date_notation
         FROM ratings WHERE artisan_id = {ph}
         ORDER BY date_notation DESC LIMIT 10
     """, (artisan_id,))
@@ -415,9 +408,10 @@ def avis_artisan(artisan_id):
     return jsonify({"avis": [dict(zip(cols, row)) for row in rows]})
 
 if __name__ == "__main__":
-    from database import init_db, init_reservations, init_users
+    from database import init_db, init_reservations, init_users, init_ratings
     init_db()
     init_reservations()
     init_users()
+    init_ratings()
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)

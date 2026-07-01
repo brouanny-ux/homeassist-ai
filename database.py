@@ -1,7 +1,6 @@
 import os
 import sqlite3
 import psycopg2
-from psycopg2.extras import RealDictCursor
 
 DATABASE_URL = os.environ.get("DATABASE_URL")
 
@@ -109,12 +108,12 @@ def init_users():
                 prenom TEXT NOT NULL,
                 nom TEXT NOT NULL,
                 email TEXT UNIQUE NOT NULL,
-                role TEXT DEFAULT 'user',
                 telephone TEXT NOT NULL,
                 pays TEXT,
                 ville TEXT NOT NULL,
                 quartier TEXT,
                 password_hash TEXT NOT NULL,
+                role TEXT DEFAULT 'user',
                 date_inscription TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
@@ -130,6 +129,7 @@ def init_users():
                 ville TEXT NOT NULL,
                 quartier TEXT,
                 password_hash TEXT NOT NULL,
+                role TEXT DEFAULT 'user',
                 date_inscription TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)

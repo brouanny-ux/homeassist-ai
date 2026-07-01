@@ -78,19 +78,7 @@
     </div>
 </div>
 
-<div class="section-label">Je suis *</div>
-<div style="display:flex;gap:10px;margin-bottom:16px;">
-    <div onclick="setRole('user')" id="role-user" style="flex:1;padding:14px;border:2px solid #5C4A32;border-radius:10px;text-align:center;cursor:pointer;background:#5C4A32;color:white;transition:all .2s;">
-        <div style="font-size:24px;margin-bottom:6px;">👤</div>
-        <div style="font-size:13px;font-weight:500;">Utilisateur</div>
-        <div style="font-size:11px;opacity:0.8;">Je cherche un service</div>
-    </div>
-    <div onclick="setRole('artisan')" id="role-artisan" style="flex:1;padding:14px;border:2px solid #D4C4A8;border-radius:10px;text-align:center;cursor:pointer;background:white;color:#5C4A32;transition:all .2s;">
-        <div style="font-size:24px;margin-bottom:6px;">🔧</div>
-        <div style="font-size:13px;font-weight:500;">Artisan / Prestataire</div>
-        <div style="font-size:11px;opacity:0.6;">Je propose mes services</div>
-    </div>
-</div>
+
 
         <div id="reg-error" class="error-msg"></div>
         <div id="reg-success" class="success-msg"></div>
@@ -242,6 +230,7 @@ function showTab(tab) {
     document.getElementById('tab-register').classList.toggle('active', tab === 'register');
     document.getElementById('tab-login').classList.toggle('active', tab === 'login');
 }
+
 let selectedRole = 'user';
 
 function setRole(role) {
@@ -264,36 +253,31 @@ function setRole(role) {
         userCard.style.borderColor = '#D4C4A8';
     }
 }
-let selectedRole = 'user';
 
-function setRole(role) {
-    selectedRole = role;
-    const userCard = document.getElementById('role-user');
-    const artisanCard = document.getElementById('role-artisan');
-    if (role === 'user') {
-        userCard.style.background = '#5C4A32';
-        userCard.style.color = 'white';
-        userCard.style.borderColor = '#5C4A32';
-        artisanCard.style.background = 'white';
-        artisanCard.style.color = '#5C4A32';
-        artisanCard.style.borderColor = '#D4C4A8';
+function updateIndicatif() {
+    const select = document.getElementById('reg-pays');
+    const option = select.options[select.selectedIndex];
+    const indicatif = option.getAttribute('data-indicatif') || '';
+    const input = document.getElementById('reg-indicatif');
+    input.value = indicatif;
+    if (select.value === 'OTHER') {
+        input.removeAttribute('readonly');
+        input.style.background = '#F5F0E8';
+        input.placeholder = '+XXX';
     } else {
-        artisanCard.style.background = '#6B8F5E';
-        artisanCard.style.color = 'white';
-        artisanCard.style.borderColor = '#6B8F5E';
-        userCard.style.background = 'white';
-        userCard.style.color = '#5C4A32';
-        userCard.style.borderColor = '#D4C4A8';
+        input.setAttribute('readonly', true);
+        input.style.background = '#E8DCC8';
     }
 }
+
 async function inscrire() {
     const prenom = document.getElementById('reg-prenom').value.trim();
     const nom = document.getElementById('reg-nom').value.trim();
     const email = document.getElementById('reg-email').value.trim();
     const pays = document.getElementById('reg-pays').value;
-const indicatif = document.getElementById('reg-indicatif').value.trim();
-const telNum = document.getElementById('reg-tel').value.trim();
-const tel = indicatif + ' ' + telNum;
+    const indicatif = document.getElementById('reg-indicatif').value.trim();
+    const telNum = document.getElementById('reg-tel').value.trim();
+    const tel = indicatif + ' ' + telNum;
     const ville = document.getElementById('reg-ville').value;
     const quartier = document.getElementById('reg-quartier').value.trim();
     const password = document.getElementById('reg-password').value;
@@ -325,12 +309,13 @@ const tel = indicatif + ' ' + telNum;
         const res = await fetch('/register', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-           body: JSON.stringify({ prenom, nom, email, telephone: tel, pays, ville, quartier, password, role: selectedRole })
+            body: JSON.stringify({ prenom, nom, email, telephone: tel, pays, ville, quartier, password, role: selectedRole })
         });
         const data = await res.json();
-       if (data.success) {
-    window.location.href = data.redirect || '/';
-}
+        if (data.success) {
+            sucDiv.textContent = '🎉 Compte créé avec succès ! Redirection...';
+            sucDiv.style.display = 'block';
+            setTimeout(() => window.location.href = data.redirect || '/', 1500);
         } else {
             errDiv.textContent = '⚠️ ' + (data.error || 'Erreur lors de l\'inscription');
             errDiv.style.display = 'block';
@@ -359,13 +344,10 @@ async function connecter() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, password })
-            
         });
-
-        
         const data = await res.json();
         if (data.success) {
-            window.location.href = '/';
+            window.location.href = data.redirect || '/';
         } else {
             errDiv.textContent = '⚠️ ' + (data.error || 'Email ou mot de passe incorrect');
             errDiv.style.display = 'block';
@@ -376,7 +358,11 @@ async function connecter() {
     }
 }
 
-document.addEventListener('keypress', e => { if(e.key === 'Enter') { document.getElementById('form-login').style.display !== 'none' ? connecter() : inscrire(); } });
+document.addEventListener('keypress', e => {
+    if(e.key === 'Enter') {
+        document.getElementById('form-login').style.display !== 'none' ? connecter() : inscrire();
+    }
+});
 </script>
 </body>
 </html>
