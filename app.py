@@ -456,6 +456,24 @@ def admin_avis():
     conn.close()
     return jsonify({"avis": [dict(zip(cols, row)) for row in rows]})
 
+@app.route("/admin-homeassist-2026")
+def admin():
+    user = session.get('user')
+    if not user:
+        return redirect("/auth")
+    conn = get_conn()
+    cursor = conn.cursor()
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"SELECT role FROM users WHERE email = {ph}", (user.get('email'),))
+    row = cursor.fetchone()
+    conn.close()
+    # Debug temporaire
+    if not row:
+        return f"❌ Utilisateur non trouvé en base pour : {user.get('email')}"
+    if row[0] != 'admin':
+        return f"❌ Rôle actuel : {row[0]} — Email : {user.get('email')}"
+    return render_template("admin.html")
+
 if __name__ == "__main__":
     from database import init_db, init_reservations, init_users, init_ratings
     init_db()
