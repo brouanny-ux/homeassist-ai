@@ -435,6 +435,25 @@ def set_admin():
     conn.commit()
     conn.close()
     return "Admin configuré !"
+@app.route("/admin/users")
+def admin_users():
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, prenom, nom, email, telephone, ville, role, date_inscription FROM users ORDER BY id DESC")
+    cols = [desc[0] for desc in cursor.description]
+    rows = cursor.fetchall()
+    conn.close()
+    return jsonify({"users": [dict(zip(cols, row)) for row in rows]})
+
+@app.route("/admin/avis")
+def admin_avis():
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM ratings ORDER BY date_notation DESC")
+    cols = [desc[0] for desc in cursor.description]
+    rows = cursor.fetchall()
+    conn.close()
+    return jsonify({"avis": [dict(zip(cols, row)) for row in rows]})
 
 if __name__ == "__main__":
     from database import init_db, init_reservations, init_users, init_ratings
