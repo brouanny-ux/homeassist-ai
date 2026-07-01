@@ -8,9 +8,10 @@ def migrate_db():
     try:
         conn = get_conn()
         cursor = conn.cursor()
+        ph = "%s" if is_pg() else "?"
         if is_pg():
             cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user';")
-            cursor.execute("UPDATE users SET role = 'admin' WHERE email = 'brouannya@gmail.com';")
+        cursor.execute(f"UPDATE users SET role = 'admin' WHERE email = {ph}", ('brouannya@gmail.com',))
         conn.commit()
         conn.close()
         print("Migration OK !")
