@@ -66,9 +66,22 @@ ARTISAN_NEEDED: [type d'artisan en un mot, ex: Electricien, Plombier, Frigoriste
 
 @app.route("/")
 def home():
-    if not session.get('user'):
+    user = session.get('user')
+    if not user:
         return redirect("/auth")
-    return render_template("index.html")
+    conn = get_conn()
+    cursor = conn.cursor()
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"SELECT role FROM users WHERE email = {ph}", (user.get('email'),))
+    row = cursor.fetchone()
+    conn.close()
+    role = row[0] if row else 'user'
+    if role == 'admin':
+        return redirect("/admin-homeassist-2026")
+    elif role == 'artisan':
+        return redirect("/dashboard/artisan")
+    else:
+        return redirect("/dashboard/user")
 
 @app.route("/chat", methods=["POST"])
 def chat():
