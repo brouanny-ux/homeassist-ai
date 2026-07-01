@@ -192,7 +192,15 @@ def chercher_artisans_page():
 @app.route("/admin-homeassist-2026")
 def admin():
     user = session.get('user')
-    if not user or user.get('role') != 'admin':
+    if not user:
+        return redirect("/auth")
+    conn = get_conn()
+    cursor = conn.cursor()
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"SELECT role FROM users WHERE email = {ph}", (user.get('email'),))
+    row = cursor.fetchone()
+    conn.close()
+    if not row or row[0] != 'admin':
         return redirect("/")
     return render_template("admin.html")
 
