@@ -4,6 +4,15 @@ from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_conn, is_pg
 import os
+
+load_dotenv()
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+
+app = Flask(__name__, static_folder='static', static_url_path='/static')
+app.secret_key = "homeassist_secret_2026"
+
+historique = []
+
 def migrate_db():
     try:
         conn = get_conn()
@@ -17,14 +26,6 @@ def migrate_db():
         print("Migration OK !")
     except Exception as e:
         print(f"Migration: {e}")
-
-load_dotenv()
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
-
-app = Flask(__name__, static_folder='static', static_url_path='/static')
-app.secret_key = "homeassist_secret_2026"
-
-historique = []
 
 def chercher_artisans(ville, specialite, quartier=""):
     conn = get_conn()
@@ -194,12 +195,8 @@ def chercher_artisans_page():
     query += " ORDER BY id DESC LIMIT 10"
     cursor.execute(query, params)
     rows = cursor.fetchall()
-    if is_pg():
-        cols = [desc[0] for desc in cursor.description]
-        artisans_list = [dict(zip(cols, row)) for row in rows]
-    else:
-        cols = [desc[0] for desc in cursor.description]
-        artisans_list = [dict(zip(cols, row)) for row in rows]
+    cols = [desc[0] for desc in cursor.description]
+    artisans_list = [dict(zip(cols, row)) for row in rows]
     conn.close()
     return jsonify({"artisans": artisans_list})
 
@@ -214,8 +211,10 @@ def admin():
     cursor.execute(f"SELECT role FROM users WHERE email = {ph}", (user.get('email'),))
     row = cursor.fetchone()
     conn.close()
-    if not row or row[0] != 'admin':
-        return redirect("/")
+    if not row:
+        return f"Utilisateur non trouve : {user.get('email')}"
+    if row[0] != 'admin':
+        return f"Role actuel : {row[0]} pour {user.get('email')}"
     return render_template("admin.html")
 
 @app.route("/admin/data")
@@ -255,6 +254,26 @@ def toggle_artisan():
     conn.close()
     return jsonify({"success": True})
 
+@app.route("/admin/users")
+def admin_users():
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT id, prenom, nom, email, telephone, ville, role, date_inscription FROM users ORDER BY id DESC")
+    cols = [desc[0] for desc in cursor.description]
+    rows = cursor.fetchall()
+    conn.close()
+    return jsonify({"users": [dict(zip(cols, row)) for row in rows]})
+
+@app.route("/admin/avis")
+def admin_avis():
+    conn = get_conn()
+    cursor = conn.cursor()
+    cursor.execute("SELECT * FROM ratings ORDER BY date_notation DESC")
+    cols = [desc[0] for desc in cursor.description]
+    rows = cursor.fetchall()
+    conn.close()
+    return jsonify({"avis": [dict(zip(cols, row)) for row in rows]})
+
 @app.route("/auth")
 def auth():
     return render_template("auth.html")
@@ -288,7 +307,7 @@ def register():
         return jsonify({"success": True, "role": role, "redirect": "/dashboard/artisan" if role == "artisan" else "/dashboard/user"})
     except Exception as e:
         if "UNIQUE" in str(e) or "unique" in str(e):
-            return jsonify({"success": False, "error": "Cet email est déjà utilisé"})
+            return jsonify({"success": False, "error": "Cet email est deja utilise"})
         return jsonify({"success": False, "error": str(e)})
     finally:
         conn.close()
@@ -320,7 +339,12 @@ def login():
                 'quartier': user["quartier"],
                 'role': role
             }
-            return jsonify({"success": True, "role": role, "redirect": "/dashboard/artisan" if role == "artisan" else "/dashboard/user"})
+            if role == 'admin':
+                return jsonify({"success": True, "role": role, "redirect": "/admin-homeassist-2026"})
+            elif role == 'artisan':
+                return jsonify({"success": True, "role": role, "redirect": "/dashboard/artisan"})
+            else:
+                return jsonify({"success": True, "role": role, "redirect": "/dashboard/user"})
     return jsonify({"success": False, "error": "Email ou mot de passe incorrect"})
 
 @app.route("/logout")
@@ -348,12 +372,7 @@ def noter_artisan():
         cursor.execute(f"""
             INSERT INTO ratings (artisan_id, user_email, note, avis)
             VALUES ({ph}, {ph}, {ph}, {ph})
-        """, (
-            data.get("artisan_id"),
-            user.get("email"),
-            data.get("note"),
-            data.get("avis", "")
-        ))
+        """, (data.get("artisan_id"), user.get("email"), data.get("note"), data.get("avis", "")))
         conn.commit()
         return jsonify({"success": True})
     except Exception as e:
@@ -366,10 +385,7 @@ def note_artisan(artisan_id):
     conn = get_conn()
     cursor = conn.cursor()
     ph = "%s" if is_pg() else "?"
-    cursor.execute(f"""
-        SELECT COUNT(note) as total, AVG(note) as moyenne
-        FROM ratings WHERE artisan_id = {ph}
-    """, (artisan_id,))
+    cursor.execute(f"SELECT COUNT(note) as total, AVG(note) as moyenne FROM ratings WHERE artisan_id = {ph}", (artisan_id,))
     row = cursor.fetchone()
     conn.close()
     if row and row[0] > 0:
@@ -414,11 +430,8 @@ def mon_profil_artisan():
     conn = get_conn()
     cursor = conn.cursor()
     ph = "%s" if is_pg() else "?"
-    cursor.execute(f"""
-        SELECT * FROM artisans
-        WHERE email = {ph} OR nom LIKE {ph}
-        LIMIT 1
-    """, (user.get('email'), f"%{user.get('nom')}%"))
+    cursor.execute(f"SELECT * FROM artisans WHERE email = {ph} OR nom LIKE {ph} LIMIT 1",
+                   (user.get('email'), f"%{user.get('nom')}%"))
     cols = [desc[0] for desc in cursor.description]
     row = cursor.fetchone()
     conn.close()
@@ -431,78 +444,28 @@ def avis_artisan(artisan_id):
     conn = get_conn()
     cursor = conn.cursor()
     ph = "%s" if is_pg() else "?"
-    cursor.execute(f"""
-        SELECT note, avis, date_notation
-        FROM ratings WHERE artisan_id = {ph}
-        ORDER BY date_notation DESC LIMIT 10
-    """, (artisan_id,))
+    cursor.execute(f"SELECT note, avis, date_notation FROM ratings WHERE artisan_id = {ph} ORDER BY date_notation DESC LIMIT 10", (artisan_id,))
     cols = [desc[0] for desc in cursor.description]
     rows = cursor.fetchall()
     conn.close()
     return jsonify({"avis": [dict(zip(cols, row)) for row in rows]})
+
 @app.route("/set-admin-secret-2026")
 def set_admin():
     conn = get_conn()
     cursor = conn.cursor()
-    # Afficher tous les users pour debug
     cursor.execute("SELECT id, email, role FROM users")
     cols = [desc[0] for desc in cursor.description]
     rows = cursor.fetchall()
     users = [dict(zip(cols, row)) for row in rows]
-    # Mettre le premier user en admin
     if users:
         ph = "%s" if is_pg() else "?"
         cursor.execute(f"UPDATE users SET role = 'admin' WHERE id = {ph}", (users[0]['id'],))
         conn.commit()
     conn.close()
-    return f"Users trouvés : {users} — Premier user mis en admin !"
-@app.route("/admin/users")
-def admin_users():
-    conn = get_conn()
-    cursor = conn.cursor()
-    cursor.execute("SELECT id, prenom, nom, email, telephone, ville, role, date_inscription FROM users ORDER BY id DESC")
-    cols = [desc[0] for desc in cursor.description]
-    rows = cursor.fetchall()
-    conn.close()
-    return jsonify({"users": [dict(zip(cols, row)) for row in rows]})
-
-@app.route("/admin/avis")
-def admin_avis():
-    conn = get_conn()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM ratings ORDER BY date_notation DESC")
-    cols = [desc[0] for desc in cursor.description]
-    rows = cursor.fetchall()
-    conn.close()
-    return jsonify({"avis": [dict(zip(cols, row)) for row in rows]})
-
-@app.route("/admin-homeassist-2026")
-def admin():
-    user = session.get('user')
-    if not user:
-        return redirect("/auth")
-    conn = get_conn()
-    cursor = conn.cursor()
-    ph = "%s" if is_pg() else "?"
-    cursor.execute(f"SELECT role FROM users WHERE email = {ph}", (user.get('email'),))
-    row = cursor.fetchone()
-    conn.close()
-    # Debug temporaire
-    if not row:
-        return f"❌ Utilisateur non trouvé en base pour : {user.get('email')}"
-    if row[0] != 'admin':
-        return f"❌ Rôle actuel : {row[0]} — Email : {user.get('email')}"
-    return render_template("admin.html")
+    return f"Users: {users} — Premier mis en admin!"
 
 if __name__ == "__main__":
-    from database import init_db, init_reservations, init_users, init_ratings
-    init_db()
-    init_reservations()
-    init_users()
-    init_ratings()
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
-    
     from database import init_db, init_reservations, init_users, init_ratings
     init_db()
     init_reservations()
