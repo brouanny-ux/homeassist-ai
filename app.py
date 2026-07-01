@@ -444,11 +444,18 @@ def avis_artisan(artisan_id):
 def set_admin():
     conn = get_conn()
     cursor = conn.cursor()
-    ph = "%s" if is_pg() else "?"
-    cursor.execute(f"UPDATE users SET role = 'admin' WHERE email = {ph}", ('brouannya@gmail.com',))
-    conn.commit()
+    # Afficher tous les users pour debug
+    cursor.execute("SELECT id, email, role FROM users")
+    cols = [desc[0] for desc in cursor.description]
+    rows = cursor.fetchall()
+    users = [dict(zip(cols, row)) for row in rows]
+    # Mettre le premier user en admin
+    if users:
+        ph = "%s" if is_pg() else "?"
+        cursor.execute(f"UPDATE users SET role = 'admin' WHERE id = {ph}", (users[0]['id'],))
+        conn.commit()
     conn.close()
-    return "Admin configuré !"
+    return f"Users trouvés : {users} — Premier user mis en admin !"
 @app.route("/admin/users")
 def admin_users():
     conn = get_conn()
