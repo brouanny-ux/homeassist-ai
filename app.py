@@ -4,6 +4,18 @@ from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_conn, is_pg
 import os
+def migrate_db():
+    try:
+        conn = get_conn()
+        cursor = conn.cursor()
+        if is_pg():
+            cursor.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user';")
+            cursor.execute("UPDATE users SET role = 'admin' WHERE email = 'brouannya@gmail.com';")
+        conn.commit()
+        conn.close()
+        print("Migration OK !")
+    except Exception as e:
+        print(f"Migration: {e}")
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -413,5 +425,14 @@ if __name__ == "__main__":
     init_reservations()
     init_users()
     init_ratings()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=False)
+    
+    from database import init_db, init_reservations, init_users, init_ratings
+    init_db()
+    init_reservations()
+    init_users()
+    init_ratings()
+    migrate_db()
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
