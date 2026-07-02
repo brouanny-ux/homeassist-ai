@@ -205,7 +205,17 @@
 
         <a href="#" class="forgot">Mot de passe oublié ?</a>
 
-        <button class="btn-main" onclick="connecter()">🚀 Se connecter</button>
+      <div style="display:flex;gap:10px;margin-top:6px;">
+    <button class="btn-main" onclick="connecter('user')" style="flex:1;background:#5C4A32;">
+        👤 Connexion Utilisateur
+    </button>
+    <button class="btn-main" onclick="connecter('artisan')" style="flex:1;background:#6B8F5E;">
+        🔧 Connexion Artisan
+    </button>
+    <button class="btn-main" onclick="connecter('admin')" style="flex:1;background:#1A1A2E;font-size:11px;">
+        🔐 Admin
+    </button>
+</div>
 
         <div class="divider"><span>ou continuer avec</span></div>
 
@@ -328,7 +338,41 @@ async function inscrire() {
     btn.textContent = '✅ Créer mon compte';
 }
 
-async function connecter() {
+async functionasync function connecter(typeConnexion = 'user') {
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const errDiv = document.getElementById('login-error');
+    errDiv.style.display = 'none';
+
+    if (!email || !password) {
+        errDiv.textContent = '⚠️ Veuillez remplir tous les champs';
+        errDiv.style.display = 'block'; return;
+    }
+
+    try {
+        const res = await fetch('/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password, type: typeConnexion })
+        });
+        const data = await res.json();
+        if (data.success) {
+            if (typeConnexion === 'admin') {
+                window.location.href = '/admin-homeassist-2026';
+            } else if (typeConnexion === 'artisan') {
+                window.location.href = '/dashboard/artisan';
+            } else {
+                window.location.href = '/dashboard/user';
+            }
+        } else {
+            errDiv.textContent = '⚠️ ' + (data.error || 'Email ou mot de passe incorrect');
+            errDiv.style.display = 'block';
+        }
+    } catch(e) {
+        errDiv.textContent = '❌ Erreur de connexion. Réessayez.';
+        errDiv.style.display = 'block';
+    }
+} {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
     const errDiv = document.getElementById('login-error');
