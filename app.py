@@ -331,6 +331,12 @@ def login():
         user = dict(zip(cols, row))
         if check_password_hash(user["password_hash"], password):
             role = user.get("role", "user")
+            type_demande = data.get("type", "user")
+
+            # Si le type demandé ne correspond pas au rôle réel → refus explicite
+            if type_demande != role:
+                return jsonify({"success": False, "error": "Accès non autorisé pour ce type de compte"})
+
             session['user'] = {
                 'email': user["email"],
                 'prenom': user["prenom"],
