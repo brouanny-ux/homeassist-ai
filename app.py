@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_conn, is_pg
 import os
+import re
 
 load_dotenv()
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
@@ -326,20 +327,41 @@ def register():
     finally:
         conn.close()
 
+def normaliser_tel(valeur):
+    """Ne garde que les chiffres d'un numéro (ignore +, espaces, tirets, indicatif)."""
+    return re.sub(r'\D', '', valeur or '')
+
 @app.route("/login", methods=["POST"])
 def login():
     data = request.json
-    email = data.get("email")
+    identifiant = (data.get("email") or "").strip()
     password = data.get("password")
     conn = get_conn()
     cursor = conn.cursor()
     ph = "%s" if is_pg() else "?"
+
+    # 1. Essai direct : correspondance exacte email ou téléphone tel quel
     cursor.execute(f"""
         SELECT id, prenom, nom, email, telephone, ville, quartier, password_hash, role
         FROM users WHERE email = {ph} OR telephone = {ph}
-    """, (email, email))
+    """, (identifiant, identifiant))
     cols = [desc[0] for desc in cursor.description]
     row = cursor.fetchone()
+
+    # 2. Si rien trouvé et que l'identifiant ressemble à un numéro, on compare
+    #    les chiffres uniquement (tolère absence d'indicatif, espaces, tirets, etc.)
+    if not row:
+        chiffres_saisis = normaliser_tel(identifiant)
+        if len(chiffres_saisis) >= 6:
+            cursor.execute("SELECT id, prenom, nom, email, telephone, ville, quartier, password_hash, role FROM users")
+            cols = [desc[0] for desc in cursor.description]
+            for candidate in cursor.fetchall():
+                candidate_dict = dict(zip(cols, candidate))
+                tel_en_base = normaliser_tel(candidate_dict.get("telephone"))
+                if tel_en_base and (tel_en_base.endswith(chiffres_saisis) or chiffres_saisis.endswith(tel_en_base)):
+                    row = candidate
+                    break
+
     conn.close()
     if row:
         user = dict(zip(cols, row))
