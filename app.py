@@ -13,6 +13,19 @@ app.secret_key = "homeassist_secret_2026"
 
 historique = []
 
+def is_admin():
+    """Vérifie que l'utilisateur en session est bien admin, en relisant le rôle en base."""
+    user = session.get('user')
+    if not user:
+        return False
+    conn = get_conn()
+    cursor = conn.cursor()
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"SELECT role FROM users WHERE email = {ph}", (user.get('email'),))
+    row = cursor.fetchone()
+    conn.close()
+    return bool(row) and row[0] == 'admin'
+
 def migrate_db():
     try:
         conn = get_conn()
@@ -202,23 +215,16 @@ def chercher_artisans_page():
 
 @app.route("/admin-homeassist-2026")
 def admin():
-    user = session.get('user')
-    if not user:
+    if not session.get('user'):
         return redirect("/auth")
-    conn = get_conn()
-    cursor = conn.cursor()
-    ph = "%s" if is_pg() else "?"
-    cursor.execute(f"SELECT role FROM users WHERE email = {ph}", (user.get('email'),))
-    row = cursor.fetchone()
-    conn.close()
-    if not row:
-        return f"Utilisateur non trouve : {user.get('email')}"
-    if row[0] != 'admin':
-        return f"Role actuel : {row[0]} pour {user.get('email')}"
+    if not is_admin():
+        return "Accès refusé — réservé aux administrateurs", 403
     return render_template("admin.html")
 
 @app.route("/admin/data")
 def admin_data():
+    if not is_admin():
+        return jsonify({"error": "Accès refusé"}), 403
     conn = get_conn()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM reservations ORDER BY id DESC")
@@ -234,6 +240,8 @@ def admin_data():
 
 @app.route("/admin/statut_reservation", methods=["POST"])
 def statut_reservation():
+    if not is_admin():
+        return jsonify({"error": "Accès refusé"}), 403
     data = request.json
     conn = get_conn()
     cursor = conn.cursor()
@@ -245,6 +253,8 @@ def statut_reservation():
 
 @app.route("/admin/toggle_artisan", methods=["POST"])
 def toggle_artisan():
+    if not is_admin():
+        return jsonify({"error": "Accès refusé"}), 403
     data = request.json
     conn = get_conn()
     cursor = conn.cursor()
@@ -256,6 +266,8 @@ def toggle_artisan():
 
 @app.route("/admin/users")
 def admin_users():
+    if not is_admin():
+        return jsonify({"error": "Accès refusé"}), 403
     conn = get_conn()
     cursor = conn.cursor()
     cursor.execute("SELECT id, prenom, nom, email, telephone, ville, role, date_inscription FROM users ORDER BY id DESC")
@@ -266,6 +278,8 @@ def admin_users():
 
 @app.route("/admin/avis")
 def admin_avis():
+    if not is_admin():
+        return jsonify({"error": "Accès refusé"}), 403
     conn = get_conn()
     cursor = conn.cursor()
     cursor.execute("SELECT * FROM ratings ORDER BY date_notation DESC")
@@ -458,18 +472,24 @@ def avis_artisan(artisan_id):
 
 @app.route("/set-admin-secret-2026")
 def set_admin():
+    # Protégé par une clé secrète définie dans les variables d'environnement Railway (ADMIN_SETUP_KEY).
+    # Usage : /set-admin-secret-2026?key=LA_CLE_SECRETE&email=quelqu-un@example.com
+    secret = os.getenv("ADMIN_SETUP_KEY")
+    if not secret or request.args.get("key") != secret:
+        return "Accès refusé", 403
+    target_email = request.args.get("email")
+    if not target_email:
+        return "Paramètre 'email' requis", 400
     conn = get_conn()
     cursor = conn.cursor()
-    cursor.execute("SELECT id, email, role FROM users")
-    cols = [desc[0] for desc in cursor.description]
-    rows = cursor.fetchall()
-    users = [dict(zip(cols, row)) for row in rows]
-    if users:
-        ph = "%s" if is_pg() else "?"
-        cursor.execute(f"UPDATE users SET role = 'admin' WHERE id = {ph}", (users[0]['id'],))
-        conn.commit()
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"UPDATE users SET role = 'admin' WHERE email = {ph}", (target_email,))
+    conn.commit()
+    updated = cursor.rowcount
     conn.close()
-    return f"Users: {users} — Premier mis en admin!"
+    if updated:
+        return f"{target_email} est maintenant admin."
+    return f"Aucun utilisateur trouvé pour {target_email}", 404
 
 if __name__ == "__main__":
     from database import init_db, init_reservations, init_users, init_ratings
