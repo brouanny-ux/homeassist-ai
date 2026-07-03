@@ -338,7 +338,7 @@ async function inscrire() {
     btn.textContent = '✅ Créer mon compte';
 }
 
-async function async function connecter(typeConnexion = 'user') {
+async function connecter(typeConnexion = 'user') {
     const email = document.getElementById('login-email').value.trim();
     const password = document.getElementById('login-password').value;
     const errDiv = document.getElementById('login-error');
@@ -372,39 +372,11 @@ async function async function connecter(typeConnexion = 'user') {
         errDiv.textContent = '❌ Erreur de connexion. Réessayez.';
         errDiv.style.display = 'block';
     }
-} {
-    const email = document.getElementById('login-email').value.trim();
-    const password = document.getElementById('login-password').value;
-    const errDiv = document.getElementById('login-error');
-    errDiv.style.display = 'none';
-
-    if (!email || !password) {
-        errDiv.textContent = '⚠️ Veuillez remplir tous les champs';
-        errDiv.style.display = 'block'; return;
-    }
-
-    try {
-        const res = await fetch('/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
-        if (data.success) {
-            window.location.href = data.redirect || '/';
-        } else {
-            errDiv.textContent = '⚠️ ' + (data.error || 'Email ou mot de passe incorrect');
-            errDiv.style.display = 'block';
-        }
-    } catch(e) {
-        errDiv.textContent = '❌ Erreur de connexion. Réessayez.';
-        errDiv.style.display = 'block';
-    }
 }
 
 document.addEventListener('keypress', e => {
     if(e.key === 'Enter') {
-        document.getElementById('form-login').style.display !== 'none' ? connecter() : inscrire();
+        document.getElementById('form-login').style.display !== 'none' ? connecter(document.querySelector('#form-login .btn-main[style*="1A1A2E"]') ? 'user' : 'user') : inscrire();
     }
 });
 </script>
