@@ -1,8 +1,9 @@
-from flask import Flask, request, jsonify, render_template, session, redirect
+from flask import Flask, request, jsonify, render_template, session, redirect, url_for
 from groq import Groq
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 from database import get_conn, is_pg
+from authlib.integrations.flask_client import OAuth
 import os
 import re
 
@@ -11,6 +12,15 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 app.secret_key = "homeassist_secret_2026"
+
+oauth = OAuth(app)
+google = oauth.register(
+    name='google',
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={'scope': 'openid email profile'}
+)
 
 historique = []
 
@@ -292,6 +302,67 @@ def admin_avis():
 @app.route("/auth")
 def auth():
     return render_template("auth.html")
+
+@app.route("/auth/google")
+def auth_google():
+    redirect_uri = url_for('auth_google_callback', _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+@app.route("/auth/google/callback")
+def auth_google_callback():
+    try:
+        token = google.authorize_access_token()
+        user_info = token.get('userinfo')
+        if not user_info:
+            return redirect("/auth?error=google")
+    except Exception:
+        return redirect("/auth?error=google")
+
+    email = user_info.get('email')
+    if not email:
+        return redirect("/auth?error=google")
+    prenom = user_info.get('given_name') or user_info.get('name') or 'Utilisateur'
+    nom = user_info.get('family_name') or ''
+
+    conn = get_conn()
+    cursor = conn.cursor()
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"SELECT prenom, nom, email, ville, quartier, role FROM users WHERE email = {ph}", (email,))
+    cols = [desc[0] for desc in cursor.description]
+    row = cursor.fetchone()
+
+    if row:
+        user = dict(zip(cols, row))
+        role = user["role"]
+        prenom_final, nom_final = user["prenom"], user["nom"]
+        ville_final, quartier_final = user["ville"], user["quartier"]
+    else:
+        # Nouveau compte via Google : mot de passe aléatoire inutilisable (connexion Google uniquement)
+        random_password_hash = generate_password_hash(os.urandom(24).hex())
+        cursor.execute(f"""
+            INSERT INTO users (prenom, nom, email, telephone, pays, ville, quartier, password_hash, role)
+            VALUES ({ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph},{ph})
+        """, (prenom, nom, email, "", "", "", "", random_password_hash, "user"))
+        conn.commit()
+        role = "user"
+        prenom_final, nom_final, ville_final, quartier_final = prenom, nom, "", ""
+
+    conn.close()
+
+    session['user'] = {
+        'email': email,
+        'prenom': prenom_final,
+        'nom': nom_final,
+        'ville': ville_final,
+        'quartier': quartier_final,
+        'role': role
+    }
+    if role == 'admin':
+        return redirect("/admin-homeassist-2026")
+    elif role == 'artisan':
+        return redirect("/dashboard/artisan")
+    else:
+        return redirect("/dashboard/user")
 
 @app.route("/register", methods=["POST"])
 def register():
