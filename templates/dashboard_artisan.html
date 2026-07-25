@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -57,6 +58,16 @@
 
         .empty-state { text-align: center; padding: 30px; color: #8B6F47; }
         .btn-primary { display: inline-block; padding: 10px 20px; background: #3A5C30; color: white; border-radius: 8px; text-decoration: none; font-size: 13px; margin-top: 10px; }
+
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(58,74,50,0.55); z-index: 100; align-items: center; justify-content: center; padding: 20px; }
+        .modal-overlay.open { display: flex; }
+        .modal-box { background: white; border-radius: 16px; padding: 24px; max-width: 420px; width: 100%; max-height: 85vh; overflow-y: auto; }
+        .modal-box h3 { color: #3A5C30; font-size: 18px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
+        .modal-close { cursor: pointer; font-size: 20px; color: #8B6F47; background: none; border: none; }
+        .profil-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 0.5px solid #EDE4D4; font-size: 13px; }
+        .profil-row:last-child { border-bottom: none; }
+        .profil-row .k { color: #8B6F47; }
+        .profil-row .v { color: #3A2E22; font-weight: 500; text-align: right; }
 
         @media (max-width: 768px) {
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
@@ -138,13 +149,14 @@
                 <h3>🟢 Ma disponibilité</h3>
                 <div class="dispo-toggle">
                     <span id="dispo-label">🟢 Disponible</span>
-                    <button class="toggle-btn toggle-on" id="dispo-btn" onclick="toggleDispo()">Actif</button>
+                    <span class="toggle-btn toggle-on" id="dispo-btn" style="cursor:default;">Actif</span>
                 </div>
-                <p style="font-size:12px;color:#8B6F47;">Activez ou désactivez votre disponibilité pour recevoir des demandes.</p>
+                <p style="font-size:12px;color:#8B6F47;">Votre disponibilité est gérée par l'équipe HomeAssist AI après vérification de votre profil.</p>
             </div>
 
             <div class="section-card">
                 <h3>⚡ Actions rapides</h3>
+                <a href="#" class="action-btn" onclick="voirProfil();return false;"><span class="icon">👁️</span> Voir mon profil</a>
                 <a href="/inscription" class="action-btn"><span class="icon">✏️</span> Modifier mon profil</a>
                 <a href="/artisans" class="action-btn"><span class="icon">🔍</span> Voir l'annuaire</a>
                 <a href="/" class="action-btn"><span class="icon">🏠</span> Accueil</a>
@@ -154,9 +166,17 @@
 
 </div>
 
+<div class="modal-overlay" id="profil-modal">
+    <div class="modal-box">
+        <h3>👁️ Mon profil <button class="modal-close" onclick="fermerProfil()">✕</button></h3>
+        <div id="profil-content"></div>
+    </div>
+</div>
+
 <script>
 let artisanId = null;
 let isDispo = true;
+let profilData = null;
 
 async function loadDashboard() {
     try {
@@ -176,6 +196,7 @@ async function loadDashboard() {
             const a = artData.artisan;
             artisanId = a.id;
             isDispo = a.disponible == 1;
+            profilData = a;
             document.getElementById('welcome-spec').textContent = '🔧 ' + a.specialite + ' — 📍 ' + a.ville + (a.quartier ? ' — ' + a.quartier : '');
             updateDispoUI();
 
@@ -221,18 +242,30 @@ function updateDispoUI() {
     }
 }
 
-async function toggleDispo() {
-    if (!artisanId) return;
-    isDispo = !isDispo;
-    updateDispoUI();
-    await fetch('/admin/toggle_artisan', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: artisanId, disponible: isDispo ? 1 : 0 })
-    });
+loadDashboard();
+
+function voirProfil() {
+    if (!profilData) { alert("Profil non chargé pour le moment."); return; }
+    const champs = [
+        ['Prénom', profilData.prenom],
+        ['Nom', profilData.nom],
+        ['Email', profilData.email],
+        ['Téléphone', profilData.telephone],
+        ['Ville', profilData.ville],
+        ['Quartier', profilData.quartier],
+        ['Spécialité', profilData.specialite],
+        ['Expérience', profilData.experience],
+        ['Disponibilité', profilData.disponible == 1 ? '🟢 Disponible' : '🔴 Indisponible'],
+    ];
+    document.getElementById('profil-content').innerHTML = champs.map(([k, v]) => `
+        <div class="profil-row"><span class="k">${k}</span><span class="v">${v || '—'}</span></div>
+    `).join('');
+    document.getElementById('profil-modal').classList.add('open');
 }
 
-loadDashboard();
+function fermerProfil() {
+    document.getElementById('profil-modal').classList.remove('open');
+}
 </script>
 </body>
 </html>

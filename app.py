@@ -551,7 +551,30 @@ def mon_profil_artisan():
     if row:
         return jsonify({"artisan": dict(zip(cols, row))})
     return jsonify({"artisan": None})
+@app.route("/mon_profil_artisan/toggle_dispo", methods=["POST"])
+def toggle_ma_dispo():
+    """Permet à l'artisan connecté de changer SA PROPRE disponibilité (pas celle d'un autre)."""
+    user = session.get('user')
+    if not user:
+        return jsonify({"error": "Non connecté"}), 401
+    data = request.json
+    nouvelle_dispo = 1 if data.get("disponible") else 0
 
+    conn = get_conn()
+    cursor = conn.cursor()
+    ph = "%s" if is_pg() else "?"
+    cursor.execute(f"SELECT id FROM artisans WHERE email = {ph} OR nom LIKE {ph} LIMIT 1",
+                   (user.get('email'), f"%{user.get('nom')}%"))
+    row = cursor.fetchone()
+    if not row:
+        conn.close()
+        return jsonify({"error": "Profil artisan introuvable"}), 404
+
+    artisan_id = row[0]
+    cursor.execute(f"UPDATE artisans SET disponible = {ph} WHERE id = {ph}", (nouvelle_dispo, artisan_id))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True, "disponible": nouvelle_dispo})
 @app.route("/avis_artisan/<int:artisan_id>")
 def avis_artisan(artisan_id):
     conn = get_conn()
