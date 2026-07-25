@@ -584,12 +584,13 @@ def set_admin():
         return f"{target_email} est maintenant admin."
     return f"Aucun utilisateur trouvé pour {target_email}", 404
 
+from database import init_db, init_reservations, init_users, init_ratings
+init_db()
+init_reservations()
+init_users()
+init_ratings()
+migrate_db()
+
 if __name__ == "__main__":
-    from database import init_db, init_reservations, init_users, init_ratings
-    init_db()
-    init_reservations()
-    init_users()
-    init_ratings()
-    migrate_db()
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=False)
